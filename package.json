@@ -1,0 +1,21 @@
+{
+  "name": "personal-site-privacy-analytics",
+  "version": "2.0.0",
+  "description": "Personal website with privacy-aware first-party analytics on Cloudflare Workers + D1",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create personal-site-analytics",
+    "db:migrate:local": "wrangler d1 migrations apply personal-site-analytics --local",
+    "db:migrate:remote": "wrangler d1 migrations apply personal-site-analytics --remote",
+    "db:shell:local": "wrangler d1 execute personal-site-analytics --local --command",
+    "db:shell:remote": "wrangler d1 execute personal-site-analytics --remote --command"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

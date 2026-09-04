@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy — Alex's site</title>
+<meta name="theme-color" content="#0e1116">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<style>
+:root{--bg:#0e1116;--card:#161b23;--text:#e8ecf1;--mut:#8b94a3;--acc:#6ea8fe;--line:#232a35}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font:16px/1.65 system-ui,sans-serif;padding:28px 20px}
+main{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{font-size:1.4rem} h2{font-size:1.05rem;margin-top:10px}
+p,li{color:var(--mut)}
+a{color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+</style>
+</head>
+<body>
+<main>
+  <h1>🔒 Privacy</h1>
+  <div class="card">
+    <h2>What this site collects</h2>
+    <ul>
+      <li>An <b>anonymous random ID</b> (cryptographically random, stored in a first-party cookie) so I can tell a <i>returning</i> browser from a new one.</li>
+      <li>Visit events: timestamp, page path, referrer when your browser sends one, device category (mobile/tablet/desktop), browser family, and whether you arrived from an in-app browser.</li>
+      <li>Coarse technical context: language list, time zone, screen-size bucket, connection type.</li>
+    </ul>
+    <h2>What it never collects</h2>
+    <ul>
+      <li>No names, emails, phone numbers, or account identifiers of any kind.</li>
+      <li>No cross-site tracking, no third-party pixels, no ad networks.</li>
+      <li>No exact IP addresses (only a salted one-way hash for abuse analysis).</li>
+      <li>No precise device fingerprinting.</li>
+    </ul>
+    <h2>Important honesty note</h2>
+    <p>The anonymous ID never reveals your identity. In my dashboard, matching a returning visit is labeled
+    <b>PROBABILISTIC</b> (same browser, probably) or <b>DETERMINISTIC</b> only for my own cookie ID — which is anonymous by design.</p>
+    <h2>Your control</h2>
+    <p>Clearing cookies or browsing privately ends visit recognition. No login is required to browse this site.</p>
+  </div>
+  <p><a href="/">← Back home</a></p>
+</main>
+</body>
+</html>

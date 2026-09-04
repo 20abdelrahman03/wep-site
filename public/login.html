@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin login</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+:root{--bg:#0e1116;--card:#161b23;--text:#e8ecf1;--mut:#8b94a3;--acc:#6ea8fe;--line:#232a35}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font:16px/1.5 system-ui,sans-serif;min-height:100dvh;
+  display:grid;place-items:center;padding:20px}
+form{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
+h1{font-size:1.2rem}
+input{background:#0d1218;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:12px;font-size:1rem}
+button{background:var(--acc);color:#0b1220;border:0;border-radius:10px;padding:12px;font-weight:700;font-size:1rem;cursor:pointer}
+button:hover{filter:brightness(1.1)}
+.err{color:#ff8080;font-size:.9rem;display:none}
+</style>
+</head>
+<body>
+<form id="f" autocomplete="off">
+  <h1>🔒 Dashboard login</h1>
+  <input id="t" type="password" placeholder="Admin token" autofocus>
+  <div class="err" id="e">Wrong token.</div>
+  <button>Enter</button>
+</form>
+<script>
+document.getElementById('f').addEventListener('submit', async function (ev) {
+  ev.preventDefault();
+  var r = await fetch('/admin/login', { method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: document.getElementById('t').value }) });
+  if (r.ok) location.href = '/admin';
+  else document.getElementById('e').style.display = 'block';
+});
+</script>
+</body>
+</html>

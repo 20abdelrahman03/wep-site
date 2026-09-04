@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analytics dashboard</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+:root{--bg:#0e1116;--card:#161b23;--text:#e8ecf1;--mut:#8b94a3;--acc:#6ea8fe;--acc2:#a78bfa;--ok:#7ee2a8;--warn:#ffcc6e;--bad:#ff8080;--line:#232a35}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.55 system-ui,sans-serif;padding:20px}
+main{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-size:1.35rem}
+h2{font-size:1rem;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi b{font-size:1.6rem;display:block}
+.kpi span{color:var(--mut);font-size:.85rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:.82rem}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap}
+th{color:var(--mut);position:sticky;top:0;background:var(--card)}
+td.wrap{white-space:normal;max-width:420px}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:.72rem;border:1px solid var(--line)}
+.tag.ig{color:var(--acc2);border-color:#3b2f63;background:#1a1530}
+.tag.det{color:var(--ok)} .tag.pro{color:var(--warn)} .tag.unk{color:var(--mut)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs button{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:99px;padding:8px 16px;cursor:pointer;font-size:.9rem}
+.tabs button.on{border-color:var(--acc);color:var(--acc)}
+.legend{color:var(--mut);font-size:.8rem;line-height:1.6}
+code{background:#0d1218;padding:1px 5px;border-radius:5px;font-size:.78rem}
+#tbl td{max-width:320px}
+details{margin-top:8px}
+</style>
+</head>
+<body>
+<main>
+  <h1>📊 Private analytics</h1>
+  <div class="grid" id="kpis"></div>
+
+  <div class="card"><h2>Traffic sources</h2><div id="src"></div></div>
+
+  <div class="card">
+    <div class="tabs" id="tabs">
+      <button data-v="events" class="on">Events</button>
+      <button data-v="requests">Raw request inspector</button>
+      <button data-v="visitors">Visitors</button>
+    </div>
+    <div style="max-height:520px;overflow:auto;margin-top:12px">
+      <table id="tbl"><thead id="th"></thead><tbody id="tb"></tbody></table>
+    </div>
+  </div>
+
+  <div class="card legend">
+    <strong>Identity model (important):</strong><br>
+    <span class="tag det">DETERMINISTIC</span> known directly from a reliable identifier — our own first-party cookie ID (an <em>anonymous</em> random ID, never a real identity).<br>
+    <span class="tag pro">PROBABILISTIC</span> likely the same browser/device based on coarse technical signals — <b>never</b> a confirmed identity.<br>
+    <span class="tag unk">UNKNOWN</span> no reliable connection exists.<br><br>
+    Anonymous IDs <b>do not</b> reveal any person's real identity, Instagram username, or account.
+    Rows marked <span class="tag ig">IG in-app</span> mean the request <i>arrived from</i> the Instagram WebView environment — nothing more.
+  </div>
+</main>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var cur = q.get('v') || 'events';
+
+  fetch('/admin/api/summary.json').then(r => r.json()).then(function (s) {
+    var k = [
+      ['Visitors', s.totals.visitors], ['Returning', s.totals.returning_visitors],
+      ['Events', s.totals.events], ['IG in-app events', s.totals.ig_events],
+      ['Logged requests', s.totals.requests],
+    ];
+    document.getElementById('kpis').innerHTML = k.map(function (x) {
+      return '<div class="kpi"><b>' + x[1] + '</b><span>' + x[0] + '</span></div>';
+    }).join('');
+    document.getElementById('src').innerHTML = '<table><tr><th>Source</th><th>Events</th></tr>' +
+      s.bySource.map(function (r) { return '<tr><td>' + r.referrer_source + '</td><td>' + r.n + '</td></tr>'; }).join('') + '</table>';
+  });
+
+  var heads = {
+    events: ['Time', 'Visitor', 'Type', 'Source', 'IG in-app', 'Identity', 'Path', 'Env'],
+    requests: ['Time', 'Visitor', 'Method', 'Path', 'Query params', 'UA', 'X-Requested-With', 'Referrer'],
+    visitors: ['Anonymous ID', 'First seen', 'Last seen', 'Visits'],
+  };
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function idTag(m) {
+    if (m === 'deterministic') return '<span class="tag det">DETERMINISTIC</span>';
+    if (m === 'probabilistic') return '<span class="tag pro">PROBABILISTIC</span>';
+    return '<span class="tag unk">UNKNOWN</span>';
+  }
+  function short(v, n) { v = String(v || ''); return '<code>' + esc(v.length > n ? v.slice(0, n) + '…' : v) + '</code>'; }
+
+  function render(view) {
+    cur = view;
+    document.querySelectorAll('#tabs button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === view); });
+    document.getElementById('th').innerHTML = '<tr>' + heads[view].map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>';
+    fetch('/admin/api/' + view + '.json?limit=200').then(r => r.json()).then(function (rows) {
+      document.getElementById('tb').innerHTML = rows.map(function (r) {
+        if (view === 'events') {
+          return '<tr><td>' + esc(r.ts).slice(0, 19).replace('T', ' ') + '</td>' +
+            '<td>' + short(r.visitor_id, 8) + '</td><td><b>' + esc(r.type) + '</b></td>' +
+            '<td>' + esc(r.referrer_source) + '</td>' +
+            '<td>' + (r.is_ig_inapp ? '<span class="tag ig">YES</span>' : '—') + '</td>' +
+            '<td>' + idTag(r.identity_mode) + '</td>' +
+            '<td class="wrap">' + esc(r.path) + '</td>' +
+            '<td class="wrap">' + short(r.env, 90) + '</td></tr>';
+        }
+        if (view === 'requests') {
+          var h = {}; try { h = JSON.parse(r.headers_json || '{}'); } catch (e) {}
+          var qq = r.query_json && r.query_json !== '{}' ? r.query_json : '';
+          return '<tr><td>' + esc(r.ts).slice(0, 19).replace('T', ' ') + '</td>' +
+            '<td>' + short(r.visitor_id, 8) + '</td><td>' + esc(r.method) + '</td>' +
+            '<td class="wrap">' + esc(r.path) + '</td>' +
+            '<td class="wrap">' + (qq ? '<details><summary>params</summary>' + short(qq, 300) + '</details>' : '—') + '</td>' +
+            '<td class="wrap">' + short(r.ua, 60) + '</td>' +
+            '<td class="wrap">' + esc(h['x-requested-with'] || '—') + '</td>' +
+            '<td class="wrap">' + esc(r.referrer || '—') + '</td></tr>';
+        }
+        return '<tr><td>' + short(r.id, 10) + '</td><td>' + esc(r.first_seen).slice(0, 19).replace('T', ' ') +
+          '</td><td>' + esc(r.last_seen).slice(0, 19).replace('T', ' ') + '</td><td><b>' + r.visit_count + '</b></td></tr>';
+      }).join('');
+    });
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { render(b.dataset.v); });
+  });
+  render(cur);
+})();
+</script>
+</body>
+</html>
