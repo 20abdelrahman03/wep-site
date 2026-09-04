@@ -1,33 +1,31 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // Worker name — becomes <name>.<account>.workers.dev
-  "name": "personal-site",
+
+  // Worker name
+  "name": "wep-site",
+
   "main": "src/worker.js",
+
   "compatibility_date": "2026-08-01",
 
-  // Static assets served by the same Worker deployment (modern Workers
-  // Static Assets — no deprecated [site] config). run_worker_first lets the
-  // Worker intercept '/' + API + admin routes (visit tracking, auth) and
-  // delegate everything else straight to the asset handler.
+  // Static assets served by the same Worker deployment
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
     "run_worker_first": ["/", "/api/*", "/admin*"]
   },
 
-  // Cloudflare D1 — persistent analytics storage.
-  // Create with: npx wrangler d1 create personal-site-analytics
-  // then paste the returned database_id below.
+  // Cloudflare D1 database
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "personal-site-analytics",
-      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID",
+      "database_id": "05c8111e-94df-450f-9191-ba007cfceec0",
       "migrations_dir": "migrations"
     }
   ]
 
-  // Secrets (never in source): set with
-  //   npx wrangler secret put ADMIN_TOKEN
-  //   npx wrangler secret put IP_HASH_SALT    (optional; falls back to ADMIN_TOKEN)
+  // Secrets are configured separately in Cloudflare:
+  // ADMIN_TOKEN
+  // IP_HASH_SALT
 }
