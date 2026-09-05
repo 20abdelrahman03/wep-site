@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALUCARD — دخول</title>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#0a0809">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0809;--ink2:#100b0d;--panel:#141014;--panel2:#191319;
+  --line:#241c20;--line2:#33262c;--text:#e9e2d8;--mut:#9c9186;
+  --gold:#c9a24b;--gold-hi:#e8c877;--gold-lo:#8a6d2c;
+  --blood:#8e1c22;--blood-hi:#c22f37;--blood-lo:#4a0f13;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--ink);color:var(--text);
+  font:400 16px/1.8 "Cairo",system-ui,sans-serif;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+/* carbon background */
+body::before{content:"";position:fixed;inset:0;z-index:-1;
+  background-image:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.016) 0 2px,transparent 2px 4px),
+    repeating-linear-gradient(-45deg,rgba(0,0,0,.35) 0 2px,transparent 2px 4px);
+  background-size:8px 8px,8px 8px}
+body::after{content:"";position:fixed;inset:-20%;z-index:-2;
+  background:
+    radial-gradient(38% 42% at 18% 12%,rgba(142,28,34,.14),transparent 60%),
+    radial-gradient(50% 60% at 50% 110%,rgba(74,15,19,.18),transparent 70%)}
+
+.box{
+  background:linear-gradient(150deg,var(--panel2),var(--panel));
+  border:1px solid var(--line2);border-radius:14px;
+  padding:36px 30px 28px;width:min(380px,100%);
+  text-align:center;position:relative;
+}
+.box::before{content:"";position:absolute;top:-1px;right:20px;left:20px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold-hi),transparent)}
+
+.brand{font:900 1.6rem/1 Cinzel,serif;color:var(--gold-hi);
+  letter-spacing:.14em;direction:ltr;margin-bottom:6px}
+.sub{color:var(--mut);font-size:.84rem;margin-bottom:26px}
+
+input[type="password"]{
+  width:100%;background:var(--ink2);
+  border:1px solid var(--line2);border-radius:9px;
+  padding:12px 16px;color:var(--text);
+  font:700 1.1rem Cairo;text-align:center;letter-spacing:.15em;
+  transition:border-color .2s;
+}
+input[type="password"]::placeholder{letter-spacing:.05em;font-weight:400;font-size:.9rem;color:var(--mut)}
+input[type="password"]:focus{outline:none;border-color:var(--gold-lo)}
+
+.go{
+  width:100%;margin-top:12px;
+  background:linear-gradient(135deg,var(--blood-lo),var(--blood));
+  border:1px solid var(--blood-hi);border-radius:9px;
+  padding:12px;color:#fff;font:700 .96rem Cairo;
+  cursor:pointer;transition:opacity .2s,transform .15s;
+}
+.go:hover{opacity:.88;transform:translateY(-1px)}
+.go:active{transform:none}
+.go:disabled{opacity:.5;cursor:default;transform:none}
+
+.err{color:#e0929a;font-size:.82rem;min-height:1.5em;margin-top:10px}
+
+.back{display:inline-block;margin-top:18px;color:var(--mut);
+  text-decoration:none;font-size:.8rem;transition:color .15s}
+.back:hover{color:var(--gold-hi)}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="brand">ALUCARD</div>
+  <p class="sub">لوحة التحليلات الخاصة</p>
+  <input type="password" id="tok" placeholder="كلمة المرور"
+         autocomplete="current-password" aria-label="كلمة مرور الأدمن">
+  <button class="go" id="btn">دخول</button>
+  <div class="err" id="err" aria-live="polite"></div>
+  <a class="back" href="/">← رجوع للموقع</a>
+</div>
+
+<script>
+(function(){
+  var tok = document.getElementById('tok');
+  var btn = document.getElementById('btn');
+  var err = document.getElementById('err');
+
+  function go(){
+    var token = tok.value.trim();
+    if(!token){ err.textContent = 'أدخل كلمة المرور'; return; }
+    btn.disabled = true;
+    btn.textContent = '…';
+    err.textContent = '';
+    fetch('/admin/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      credentials:'same-origin',
+      body:JSON.stringify({token:token})
+    }).then(function(r){return r.json();})
+    .then(function(d){
+      if(d.ok){
+        tok.value = '';
+        location.href = '/dashboard';
+      } else {
+        err.textContent = 'كلمة المرور غلط';
+        tok.select();
+      }
+    }).catch(function(){
+      err.textContent = 'خطأ في الاتصال — حاول تاني';
+    }).finally(function(){
+      btn.disabled = false;
+      btn.textContent = 'دخول';
+    });
+  }
+
+  btn.addEventListener('click', go);
+  tok.addEventListener('keydown', function(e){ if(e.key==='Enter') go(); });
+  tok.focus();
+})();
+</script>
+</body>
+</html>

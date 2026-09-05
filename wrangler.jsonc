@@ -1,0 +1,36 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // Worker name — matches the deployed Cloudflare Worker & the repo
+  "name": "wep-site",
+
+  "main": "src/worker.js",
+
+  "compatibility_date": "2026-08-01",
+
+  // Static assets served by the same Worker deployment.
+  // run_worker_first: true → the Worker is the SINGLE router for every request.
+  // This removes the asset-first vs worker-first split that let the static
+  // asset handler 307-redirect /dashboard.html back onto the worker-first
+  // /dashboard path (the production ERR_TOO_MANY_REDIRECTS loop). The Worker
+  // serves assets via env.ASSETS.fetch with fully normalized paths.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+
+  // Cloudflare D1 database — the real production database.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "personal-site-analytics",
+      "database_id": "05c8111e-94df-450f-9191-ba007cfceec0",
+      "migrations_dir": "migrations"
+    }
+  ]
+
+  // Secrets are configured separately in Cloudflare (never in source):
+  //   ADMIN_TOKEN
+  //   IP_HASH_SALT
+}

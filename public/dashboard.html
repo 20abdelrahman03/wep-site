@@ -1,0 +1,1127 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#0a0809">
+<title>ALUCARD Analytics</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='14' fill='%230a0809'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='%23c9a24b' font-family='Georgia'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Cinzel:wght@600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* palette — ALUCARD identity */
+  --ink:#0a0809; --ink-2:#0f0c0e; --ink-3:#141014;
+  --panel:#151013; --panel-2:#1a1418; --panel-hi:#20181d;
+  --line:#241c20; --line-2:#332129; --line-hi:#453142;
+  --text:#ece3d6; --text-2:#c9beb1; --mut:#948676; --dim:#65594c;
+  --gold:#c9a24b; --gold-hi:#e8c877; --gold-lo:#8a6d2c; --gold-glow:rgba(232,200,119,.15);
+  --blood:#8e1c22; --blood-hi:#c22f37; --blood-lo:#4a0f13; --blood-glow:rgba(194,47,55,.14);
+  --emerald:#2ec49b; --emerald-dim:#1a6b56;
+  --amber:#e8a04b; --amber-dim:#8a5c1e;
+  --azure:#5b9dd9; --azure-dim:#2f5a80;
+  --slate:#7b8fa3;
+  --ok:#2ec49b; --warn:#e8a04b; --err:#c22f37; --info:#5b9dd9;
+  --shadow:0 4px 24px rgba(0,0,0,.55);
+  --shadow-hi:0 8px 32px rgba(0,0,0,.75);
+  --radius:12px; --radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--ink);color:var(--text);
+  font:400 15px/1.6 "Cairo",system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{min-height:100vh;padding:16px 14px 60px;position:relative;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(60% 60% at 12% 6%,rgba(142,28,34,.10),transparent 60%),
+    radial-gradient(50% 50% at 92% 88%,rgba(74,15,19,.16),transparent 65%);
+  }
+body::after{content:"";position:fixed;inset:0;z-index:-1;opacity:.28;pointer-events:none;
+  background-image:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.014) 0 2px,transparent 2px 4px),
+    repeating-linear-gradient(-45deg,rgba(0,0,0,.28) 0 2px,transparent 2px 4px);
+  background-size:8px 8px}
+
+main{max-width:1360px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+
+/* code / ID text */
+.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82em;
+  direction:ltr;letter-spacing:.02em;color:var(--text-2)}
+
+/* ═══════════════════ AUTH WALL ═══════════════════ */
+#authWall{display:none;align-items:center;justify-content:center;min-height:85vh;padding:20px}
+#authWall.show{display:flex}
+.auth-card{width:min(400px,100%);background:linear-gradient(158deg,var(--panel-2),var(--panel));
+  border:1px solid var(--line-2);border-radius:16px;padding:38px 32px 30px;text-align:center;
+  position:relative;box-shadow:var(--shadow-hi)}
+.auth-card::before{content:"";position:absolute;top:-1px;right:24px;left:24px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold-hi),transparent)}
+.auth-card .brand{font:900 1.7rem/1 Cinzel,serif;color:var(--gold-hi);
+  letter-spacing:.16em;direction:ltr;margin-bottom:8px}
+.auth-card .sub{color:var(--mut);font-size:.86rem;margin-bottom:26px;letter-spacing:.02em}
+.auth-card input{width:100%;background:var(--ink-2);border:1px solid var(--line-2);border-radius:10px;
+  padding:13px 16px;color:var(--text);font:700 1.05rem Cairo;text-align:center;
+  letter-spacing:.12em;-webkit-text-security:disc;transition:border-color .2s}
+.auth-card input:focus{outline:none;border-color:var(--gold-lo)}
+.auth-card .go{width:100%;margin-top:14px;background:linear-gradient(135deg,var(--blood-lo),var(--blood));
+  border:1px solid var(--blood-hi);border-radius:10px;padding:13px;color:#fff;
+  font:700 1rem Cairo;cursor:pointer;transition:transform .12s,filter .2s}
+.auth-card .go:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.auth-card .go:active{transform:none}
+.auth-card .go:disabled{opacity:.55;cursor:default;transform:none}
+.auth-card .err{color:#e0929a;font-size:.83rem;min-height:1.4em;margin-top:10px}
+.auth-card .back{display:inline-block;margin-top:18px;color:var(--mut);
+  text-decoration:none;font-size:.78rem;transition:color .15s}
+.auth-card .back:hover{color:var(--gold-hi)}
+
+/* ═══════════════════ HEADER ═══════════════════ */
+.top-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
+  padding:14px 16px;background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--line-2);border-radius:14px;position:sticky;top:8px;z-index:20;
+  box-shadow:var(--shadow);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.top-bar .l{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.top-bar h1{font:900 1.15rem/1 Cinzel,serif;color:var(--gold-hi);letter-spacing:.15em;direction:ltr}
+.top-bar .tag{font:700 .68rem Cinzel;color:var(--gold-lo);letter-spacing:.28em;
+  direction:ltr;padding:3px 9px;border:1px solid var(--gold-lo);border-radius:99px}
+.top-bar .r{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.live-pill{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;
+  border:1px solid var(--emerald-dim);border-radius:99px;background:rgba(46,196,155,.06);
+  font:700 .78rem Cairo;color:#8ecbb8}
+.live-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--emerald);
+  box-shadow:0 0 0 0 rgba(46,196,155,.6);animation:pulse 1.8s infinite}
+.live-pill.zero{border-color:var(--line-2);color:var(--mut);background:transparent}
+.live-pill.zero .dot{background:var(--dim);animation:none;box-shadow:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(46,196,155,.6)}70%{box-shadow:0 0 0 10px rgba(46,196,155,0)}100%{box-shadow:0 0 0 0 rgba(46,196,155,0)}}
+.live-pill b{font-family:"JetBrains Mono";direction:ltr;color:#b9e3d3}
+.updated{font:600 .72rem Cairo;color:var(--dim);direction:ltr;font-family:"JetBrains Mono"}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:var(--ink-3);
+  color:var(--text-2);border:1px solid var(--line-2);border-radius:9px;
+  font:600 .8rem Cairo;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn:hover{color:var(--gold-hi);border-color:var(--gold-lo);background:var(--panel-hi)}
+.btn.gold{border-color:var(--gold-lo);color:var(--gold-hi)}
+.btn.gold:hover{background:var(--gold-glow)}
+.btn.blood{border-color:var(--blood-lo);color:#e0929a}
+.btn.blood:hover{background:var(--blood-glow);color:#f0a3aa}
+.btn.primary{background:linear-gradient(135deg,var(--blood-lo),var(--blood));
+  border-color:var(--blood-hi);color:#fff;font-weight:700}
+.btn.primary:hover{filter:brightness(1.12)}
+.btn.small{padding:4px 9px;font-size:.72rem}
+.btn svg{width:14px;height:14px;flex-shrink:0}
+
+/* ═══════════════════ FILTERS ═══════════════════ */
+.filters{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.filters .hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;
+  cursor:pointer;user-select:none;background:linear-gradient(180deg,var(--panel-2),var(--panel))}
+.filters .hdr h3{font:800 .78rem Cairo;color:var(--gold-hi);letter-spacing:.06em}
+.filters .hdr .chev{transition:transform .2s;color:var(--mut)}
+.filters.open .hdr .chev{transform:rotate(180deg)}
+.filters .body{display:none;padding:14px;border-top:1px solid var(--line);
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.filters.open .body{display:grid}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld label{font:600 .68rem Cairo;color:var(--mut);letter-spacing:.06em;text-transform:uppercase}
+.fld input,.fld select{background:var(--ink-2);border:1px solid var(--line-2);border-radius:8px;
+  padding:8px 10px;color:var(--text);font:500 .82rem Cairo}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--gold-lo)}
+.filters .actions{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.active-badges{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 12px}
+.active-badges:empty{display:none}
+.badge-f{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;
+  background:var(--gold-glow);border:1px solid var(--gold-lo);border-radius:99px;
+  font:600 .72rem Cairo;color:var(--gold-hi)}
+.badge-f .x{cursor:pointer;color:var(--mut);font-weight:900}
+.badge-f .x:hover{color:var(--blood-hi)}
+
+/* ═══════════════════ SECTION FRAMES ═══════════════════ */
+section.card{background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-bottom:14px;flex-wrap:wrap}
+.sec-hdr h2{font:800 1rem Cairo;color:var(--gold-hi);letter-spacing:.03em;
+  display:flex;align-items:center;gap:8px}
+.sec-hdr h2 .bar{width:3px;height:18px;background:var(--gold);border-radius:2px;display:inline-block}
+.sec-hdr .hint{font:500 .76rem Cairo;color:var(--mut)}
+.sec-hdr .actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ═══════════════════ KPI CARDS ═══════════════════ */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.kpi{background:linear-gradient(158deg,var(--panel-hi),var(--panel-2));
+  border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;
+  position:relative;overflow:hidden;transition:transform .15s,border-color .2s}
+.kpi:hover{border-color:var(--line-hi);transform:translateY(-1px)}
+.kpi::before{content:"";position:absolute;top:0;right:0;left:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold-lo),transparent);opacity:.4}
+.kpi.human::before{background:linear-gradient(90deg,transparent,var(--emerald),transparent);opacity:.6}
+.kpi.bot::before{background:linear-gradient(90deg,transparent,var(--blood-hi),transparent);opacity:.6}
+.kpi.warn::before{background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:.6}
+.kpi.info::before{background:linear-gradient(90deg,transparent,var(--azure),transparent);opacity:.6}
+.kpi .lbl{display:flex;align-items:center;gap:7px;font:600 .74rem Cairo;
+  color:var(--mut);letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px}
+.kpi .lbl .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.kpi.human .lbl .dot{background:var(--emerald)}
+.kpi.bot .lbl .dot{background:var(--blood-hi)}
+.kpi.warn .lbl .dot{background:var(--amber)}
+.kpi.info .lbl .dot{background:var(--azure)}
+.kpi .val{font:800 1.9rem "JetBrains Mono",Cairo;color:var(--text);direction:ltr;
+  line-height:1.05;margin-bottom:4px}
+.kpi.human .val{color:#a8e5cf}
+.kpi.bot .val{color:#f0a3aa}
+.kpi .sub{font:500 .76rem Cairo;color:var(--dim);letter-spacing:.02em}
+
+/* ═══════════════════ CHARTS ═══════════════════ */
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.subcard{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:14px}
+.subcard h4{font:700 .8rem Cairo;color:var(--gold-hi);margin-bottom:12px;
+  display:flex;align-items:center;justify-content:space-between}
+.subcard h4 small{color:var(--mut);font-weight:500;font-size:.72rem}
+
+/* horizontal bars */
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar-row{display:grid;grid-template-columns:110px 1fr auto auto;gap:10px;align-items:center;
+  font:500 .82rem Cairo}
+.bar-row .name{color:var(--text-2);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
+.bar-row .track{background:var(--panel);border-radius:99px;height:8px;overflow:hidden;
+  border:1px solid var(--line)}
+.bar-row .fill{height:100%;background:linear-gradient(90deg,var(--blood-lo),var(--blood-hi));
+  border-radius:99px;transition:width .4s}
+.bar-row .fill.human{background:linear-gradient(90deg,var(--emerald-dim),var(--emerald))}
+.bar-row .fill.gold{background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi))}
+.bar-row .fill.info{background:linear-gradient(90deg,var(--azure-dim),var(--azure))}
+.bar-row .meta{font-size:.72rem;color:var(--mut);white-space:nowrap;direction:ltr}
+.bar-row .num{font-family:"JetBrains Mono";font-weight:600;color:var(--text);
+  min-width:38px;text-align:end;direction:ltr}
+
+/* time chart */
+.time-chart{position:relative;height:150px}
+.time-chart svg{width:100%;height:100%;overflow:visible}
+.time-chart .line{fill:none;stroke:var(--gold-hi);stroke-width:2}
+.time-chart .line-h{stroke:var(--emerald)}
+.time-chart .area{fill:url(#areaGrad);opacity:.35}
+.time-chart .grid{stroke:var(--line);stroke-width:.5}
+.time-chart .axis{font:500 .65rem "JetBrains Mono";fill:var(--dim)}
+
+/* ═══════════════════ TABLE (sessions / live) ═══════════════════ */
+.table-wrap{overflow-x:auto;margin:0 -18px;padding:0 18px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin}
+table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:640px}
+th{text-align:start;font:700 .68rem Cairo;color:var(--mut);letter-spacing:.06em;
+  text-transform:uppercase;padding:10px 8px;border-bottom:1px solid var(--line-2);
+  background:var(--ink-2);position:sticky;top:0;white-space:nowrap}
+td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle;
+  white-space:nowrap;color:var(--text-2)}
+tr:hover td{background:rgba(232,200,119,.03)}
+tr.row-click{cursor:pointer}
+tr.row-click:hover td{background:var(--gold-glow)}
+td.exp{white-space:normal}
+td .id{font-family:"JetBrains Mono";font-size:.74em;color:var(--mut)}
+
+/* pills / badges */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:99px;
+  font:700 .68rem Cairo;letter-spacing:.05em;text-transform:uppercase;
+  border:1px solid var(--line-2);color:var(--mut);white-space:nowrap}
+.pill.human{background:rgba(46,196,155,.10);border-color:var(--emerald-dim);color:#a8e5cf}
+.pill.bot{background:rgba(194,47,55,.10);border-color:var(--blood-lo);color:#f0a3aa}
+.pill.unknown{background:rgba(123,143,163,.08);border-color:#3a4756;color:var(--slate)}
+.pill.suspicious{background:rgba(232,160,75,.10);border-color:var(--amber-dim);color:#f5c589}
+.pill.internal{background:rgba(232,200,119,.08);border-color:var(--gold-lo);color:var(--gold-hi)}
+.pill.social_preview{background:rgba(91,157,217,.08);border-color:var(--azure-dim);color:#a8c9e5}
+.pill .conf{font-family:"JetBrains Mono";font-size:.85em;opacity:.75;direction:ltr}
+
+/* states */
+.state{display:flex;align-items:center;justify-content:center;padding:36px 20px;
+  border:1px dashed var(--line-2);border-radius:10px;color:var(--mut);
+  font-size:.85rem;flex-direction:column;gap:10px;text-align:center}
+.state.err{border-color:var(--blood-lo);color:#e0929a;background:rgba(194,47,55,.04)}
+.state svg{width:32px;height:32px;opacity:.5}
+
+.spinner{width:20px;height:20px;border:2px solid var(--line-2);border-top-color:var(--gold-hi);
+  border-radius:50%;animation:spin 1s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══════════════════ DRAWER (session inspector) ═══════════════════ */
+.veil{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;
+  opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(3px)}
+.veil.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:min(560px,92vw);z-index:101;
+  background:linear-gradient(200deg,var(--panel-2),var(--ink-3) 60%);
+  border-right:1px solid var(--line-hi);transform:translateX(-100%);transition:transform .3s cubic-bezier(.16,1,.3,1);
+  display:flex;flex-direction:column;box-shadow:var(--shadow-hi)}
+[dir=rtl] .drawer{left:auto;right:0;border-right:none;border-left:1px solid var(--line-hi);
+  transform:translateX(100%)}
+.drawer.open{transform:translateX(0)}
+.drawer .hd{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-bottom:1px solid var(--line-2);background:var(--panel-hi)}
+.drawer .hd h3{font:800 .9rem Cairo;color:var(--gold-hi)}
+.drawer .close{background:none;border:1px solid var(--line-2);color:var(--mut);
+  border-radius:8px;padding:5px 10px;cursor:pointer;font:600 .8rem Cairo}
+.drawer .close:hover{color:var(--blood-hi);border-color:var(--blood-lo)}
+.drawer .body{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:16px}
+.dsec h4{font:700 .78rem Cairo;color:var(--gold-hi);margin-bottom:8px;
+  letter-spacing:.04em;text-transform:uppercase;font-size:.72rem}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.82rem}
+.kv dt{color:var(--mut);font-weight:600}
+.kv dd{color:var(--text);font-family:"JetBrains Mono";font-size:.78rem;direction:ltr;
+  text-align:end;word-break:break-all}
+.reasons{display:flex;flex-direction:column;gap:6px;list-style:none}
+.reasons li{display:flex;align-items:baseline;gap:8px;padding:7px 10px;
+  border-radius:8px;background:var(--ink-2);font-size:.82rem;color:var(--text-2)}
+.reasons li.human{border-inline-start:3px solid var(--emerald)}
+.reasons li.bot{border-inline-start:3px solid var(--blood-hi)}
+.reasons li.suspicious{border-inline-start:3px solid var(--amber)}
+.reasons li.none{border-inline-start:3px solid var(--dim);color:var(--mut)}
+.reasons li .w{margin-inline-start:auto;font-family:"JetBrains Mono";font-size:.72rem;
+  color:var(--gold-hi);direction:ltr}
+.timeline{display:flex;flex-direction:column;gap:2px;font-size:.78rem}
+.tl-row{display:grid;grid-template-columns:80px 100px 1fr;gap:8px;padding:6px 8px;
+  border-radius:6px;transition:background .15s}
+.tl-row:hover{background:var(--ink-2)}
+.tl-row .t{font-family:"JetBrains Mono";color:var(--dim);direction:ltr;font-size:.72rem}
+.tl-row .ty{font:700 .68rem Cairo;padding:1px 7px;border-radius:99px;text-align:center;
+  border:1px solid var(--line-2);color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.tl-row .ty.pageview{color:#a8e5cf;border-color:var(--emerald-dim);background:rgba(46,196,155,.05)}
+.tl-row .ty.link_click{color:#f5c589;border-color:var(--amber-dim);background:rgba(232,160,75,.05)}
+.tl-row .ty.beacon_env{color:#a8c9e5;border-color:var(--azure-dim);background:rgba(91,157,217,.05)}
+.tl-row .ty.visibility{color:var(--gold-hi);border-color:var(--gold-lo);background:var(--gold-glow)}
+.tl-row .d{color:var(--text-2);direction:ltr;overflow:hidden;text-overflow:ellipsis}
+
+/* ═══════════════════ RESPONSIVE ═══════════════════ */
+@media(max-width:720px){
+  body{padding:10px 8px 60px}
+  main{gap:12px}
+  .top-bar{padding:12px;position:relative;top:0}
+  .top-bar h1{font-size:1rem}
+  .top-bar .tag{display:none}
+  section.card{padding:14px}
+  .sec-hdr h2{font-size:.92rem}
+  .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+  .kpi{padding:12px}
+  .kpi .val{font-size:1.5rem}
+  .kpi .lbl{font-size:.68rem}
+  .kpi .sub{font-size:.7rem}
+  .bar-row{grid-template-columns:90px 1fr auto;gap:6px}
+  .bar-row .meta{display:none}
+  .drawer{width:100vw}
+  .tl-row{grid-template-columns:70px 90px 1fr;font-size:.72rem}
+  .btn{padding:6px 10px;font-size:.74rem}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+
+  <!-- ═══ AUTH WALL (hidden by default; only shown when API says 401) ═══ -->
+  <div id="authWall">
+    <div class="auth-card">
+      <div class="brand">ALUCARD</div>
+      <p class="sub">لوحة التحليلات — إدخال كلمة المرور</p>
+      <input type="password" id="tokenInput" placeholder="كلمة المرور"
+             autocomplete="current-password" aria-label="ADMIN_TOKEN">
+      <button class="go" id="loginBtn">دخول</button>
+      <div class="err" id="loginErr" aria-live="polite"></div>
+      <a class="back" href="/">← رجوع للموقع</a>
+    </div>
+  </div>
+
+  <!-- ═══ DASHBOARD (hidden until first auth probe succeeds) ═══ -->
+  <div id="mainContent" style="display:none;flex-direction:column;gap:18px">
+
+    <!-- HEADER -->
+    <header class="top-bar">
+      <div class="l">
+        <h1>ALUCARD</h1>
+        <span class="tag">ANALYTICS</span>
+        <span class="live-pill zero" id="livePill">
+          <span class="dot"></span>
+          <span>Live now:</span>
+          <b id="liveNum">0</b>
+        </span>
+      </div>
+      <div class="r">
+        <span class="updated" id="updatedAt">—</span>
+        <button class="btn" id="refreshBtn" title="تحديث">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15.5-6.4L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.4L3 16"/><path d="M3 21v-5h5"/></svg>
+          <span>تحديث</span>
+        </button>
+        <button class="btn gold" id="exportBtn" title="تنزيل JSON كامل">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13"/><path d="M6 11l6 6 6-6"/><path d="M4 21h16"/></svg>
+          <span>تحميل JSON الكامل</span>
+        </button>
+        <button class="btn" id="testModeBtn" title="وضع القياس الداخلي">اختبار</button>
+        <button class="btn blood" id="logoutBtn" title="خروج">خروج</button>
+      </div>
+    </header>
+
+    <!-- FILTERS -->
+    <div class="filters" id="filtersBox">
+      <div class="hdr" id="filtersToggle">
+        <h3>🔍 فلاتر</h3>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="body">
+        <div class="fld"><label>من تاريخ</label><input type="date" id="f_from"></div>
+        <div class="fld"><label>إلى تاريخ</label><input type="date" id="f_to"></div>
+        <div class="fld"><label>المصدر</label><input type="text" id="f_source" placeholder="direct / instagram / …"></div>
+        <div class="fld"><label>الجهاز</label>
+          <select id="f_device"><option value="">الكل</option>
+            <option>mobile</option><option>tablet</option><option>desktop</option>
+          </select></div>
+        <div class="fld"><label>نظام التشغيل</label><input type="text" id="f_os" placeholder="iOS / Android / …"></div>
+        <div class="fld"><label>المتصفح</label><input type="text" id="f_browser" placeholder="Chrome / Safari / …"></div>
+        <div class="fld"><label>التصنيف</label>
+          <select id="f_classification"><option value="">الكل</option>
+            <option value="human_likely">HUMAN_LIKELY</option>
+            <option value="bot">BOT</option>
+            <option value="suspicious">SUSPICIOUS</option>
+            <option value="unknown">UNKNOWN</option>
+            <option value="social_preview">SOCIAL_PREVIEW</option>
+          </select></div>
+        <div class="fld"><label>مدمج (in-app)</label>
+          <select id="f_inapp"><option value="">الكل</option>
+            <option value="1">مدمج فقط</option><option value="0">متصفح عادي فقط</option>
+          </select></div>
+        <div class="fld"><label>Visitor ID</label><input type="text" id="f_visitor" placeholder="32-hex"></div>
+        <div class="fld"><label>Internal/Test</label>
+          <select id="f_internal"><option value="">استبعاد افتراضي</option>
+            <option value="1">Internal فقط</option>
+          </select></div>
+        <div class="actions">
+          <button class="btn small" id="f_apply">تطبيق</button>
+          <button class="btn small" id="f_clear">مسح</button>
+        </div>
+      </div>
+      <div class="active-badges" id="activeBadges"></div>
+    </div>
+
+    <!-- KPI OVERVIEW -->
+    <section class="card">
+      <div class="sec-hdr">
+        <h2><span class="bar"></span>نظرة عامة</h2>
+        <span class="hint">تشمل الحركة الخارجية فقط. Internal/Test مستبعد.</span>
+      </div>
+      <div class="kpi-grid" id="kpiRow">
+        <div class="state"><span class="spinner"></span>جاري التحميل…</div>
+      </div>
+      <div id="reconBox" style="margin-top:14px;font-size:.78rem;color:var(--mut);line-height:1.7"></div>
+    </section>
+
+    <!-- TRAFFIC + CLASSIFICATION -->
+    <section class="card">
+      <div class="sec-hdr">
+        <h2><span class="bar"></span>الحركة والتصنيف</h2>
+        <span class="hint">تصنيف احتمالي بأدلة موزونة — لا يقين مطلق.</span>
+      </div>
+      <div class="grid-2">
+        <div class="subcard">
+          <h4>الحركة عبر الزمن <small id="overTimeSub">—</small></h4>
+          <div class="time-chart"><svg id="timeChart" viewBox="0 0 600 150" preserveAspectRatio="none">
+            <defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#c9a24b" stop-opacity=".4"/>
+              <stop offset="100%" stop-color="#c9a24b" stop-opacity="0"/>
+            </linearGradient></defs>
+          </svg></div>
+        </div>
+        <div class="subcard">
+          <h4>توزيع التصنيفات <small>Human/Bot/Unknown/…</small></h4>
+          <div id="clsChart"><div class="state">—</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOURCES + DEVICES + BROWSERS + OS -->
+    <section class="card">
+      <div class="sec-hdr">
+        <h2><span class="bar"></span>المصادر والأجهزة</h2>
+      </div>
+      <div class="grid-2">
+        <div class="subcard">
+          <h4>مصادر الزيارات <small>Traffic sources</small></h4>
+          <div id="srcChart"><div class="state">—</div></div>
+        </div>
+        <div class="subcard">
+          <h4>نوع الجهاز <small>Device type</small></h4>
+          <div id="devChart"><div class="state">—</div></div>
+        </div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="subcard">
+          <h4>نظام التشغيل <small>OS family</small></h4>
+          <div id="osChart"><div class="state">—</div></div>
+        </div>
+        <div class="subcard">
+          <h4>المتصفح <small>Browser</small></h4>
+          <div id="brChart"><div class="state">—</div></div>
+        </div>
+        <div class="subcard">
+          <h4>الصانع <small>Vendor</small></h4>
+          <div id="vendorChart"><div class="state">—</div></div>
+        </div>
+      </div>
+      <div class="subcard" style="margin-top:14px">
+        <h4>متصفحات داخل التطبيقات <small>In-app webviews</small></h4>
+        <div id="inappChart"><div class="state">لا توجد جلسات in-app</div></div>
+      </div>
+    </section>
+
+    <!-- LIVE NOW -->
+    <section class="card">
+      <div class="sec-hdr">
+        <h2><span class="bar"></span>مباشر الآن <small class="hint" id="liveHint">آخر 5 دقائق</small></h2>
+        <div class="actions">
+          <button class="btn small" id="liveRefresh">تحديث</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="liveTable">
+          <thead><tr>
+            <th>وقت النشاط</th>
+            <th>Visitor</th>
+            <th>المسار الحالي</th>
+            <th>المصدر</th>
+            <th>الجهاز</th>
+            <th>المتصفح</th>
+            <th>التصنيف</th>
+            <th>Pageviews</th>
+          </tr></thead>
+          <tbody id="liveBody"><tr><td colspan="8" class="exp"><div class="state">جاري التحميل…</div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SESSIONS TABLE -->
+    <section class="card">
+      <div class="sec-hdr">
+        <h2><span class="bar"></span>الجلسات <small class="hint">اضغط جلسة لعرض التفاصيل</small></h2>
+        <div class="actions">
+          <select id="sessLimit" class="btn small" style="padding:5px 9px">
+            <option value="50">50</option><option value="200" selected>200</option><option value="500">500</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="sessTable">
+          <thead><tr>
+            <th>بدأت</th>
+            <th>Visitor</th>
+            <th>المصدر</th>
+            <th>الجهاز</th>
+            <th>OS</th>
+            <th>المتصفح</th>
+            <th>Pageviews</th>
+            <th>المدة</th>
+            <th>التصنيف</th>
+          </tr></thead>
+          <tbody id="sessBody"><tr><td colspan="9" class="exp"><div class="state">جاري التحميل…</div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- INTERNAL / TEST TRAFFIC -->
+    <section class="card" id="internalCard" style="display:none">
+      <div class="sec-hdr">
+        <h2><span class="bar" style="background:var(--gold-hi)"></span>Internal / Test Traffic <small class="hint">مستبعدة من كل المجاميع أعلاه</small></h2>
+      </div>
+      <div id="internalBody"><div class="state">—</div></div>
+    </section>
+
+  </div><!-- /mainContent -->
+
+  <!-- Session inspector drawer -->
+  <div class="veil" id="veil"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="hd">
+      <h3 id="drawerTitle">تفاصيل الجلسة</h3>
+      <button class="close" id="drawerClose">إغلاق ×</button>
+    </div>
+    <div class="body" id="drawerBody"><div class="state"><span class="spinner"></span></div></div>
+  </aside>
+</main>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ═══════════════════ UTILITIES ═══════════════════ */
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function fmtNum(n){ if(n==null||isNaN(n))return'—'; if(n>=1000000)return(n/1000000).toFixed(1)+'M';
+    if(n>=1000)return(n/1000).toFixed(1)+'K'; return String(n); }
+  function fmtDur(s){ if(s==null||s<0)return'—'; s=Math.round(s); if(s<60)return s+'ث';
+    if(s<3600)return Math.floor(s/60)+'د '+(s%60)+'ث'; return Math.floor(s/3600)+'س '+Math.floor(s%3600/60)+'د'; }
+  function fmtDT(iso){ if(!iso)return'—'; try{ var d=new Date(iso);
+    return d.toLocaleString('ar-EG',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); }catch(e){return String(iso);} }
+  function fmtT(iso){ if(!iso)return'—'; try{ return new Date(iso).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }catch(e){return'—';} }
+  function agoSec(iso){ if(!iso)return null; return Math.max(0,Math.round((Date.now()-Date.parse(iso))/1000)); }
+  function shortId(id){ if(!id)return'—'; return id.slice(0,8)+'…'+id.slice(-4); }
+  function pctOf(part,total){ if(!total)return 0; return Math.round(part*100/total); }
+  var CLASS_LABELS = { human_likely:'HUMAN', bot:'BOT', suspicious:'SUSPICIOUS',
+    unknown:'UNKNOWN', internal:'INTERNAL', social_preview:'PREVIEW' };
+  function pill(cls, confidence){
+    var k = cls||'unknown';
+    var label = CLASS_LABELS[k] || k.toUpperCase();
+    var conf = (confidence!=null) ? '<span class="conf">'+Math.round(confidence)+'%</span>' : '';
+    return '<span class="pill '+esc(k)+'">'+esc(label)+' '+conf+'</span>';
+  }
+  function deviceLabel(row){
+    // Honest device labelling — vendor + model when actually detectable.
+    var v = row.device_vendor && row.device_vendor !== 'unknown' ? row.device_vendor : null;
+    var m = row.device_model && row.device_model !== 'unknown' && row.device_model !== 'Unknown' ? row.device_model : null;
+    var os = row.os && row.os !== 'unknown' ? row.os : null;
+    if (v && m && m.toLowerCase().indexOf(v.toLowerCase()) === -1) return v + ' ' + m;
+    if (m) return m;
+    if (v) return v + (os ? ' — ' + os : '');
+    if (os) return os + ' — model unknown';
+    return 'Unknown device';
+  }
+  function debounce(fn, ms){ var t; return function(){ clearTimeout(t);
+    var a=arguments,s=this; t=setTimeout(function(){fn.apply(s,a);},ms); }; }
+
+  /* ═══════════════════ CENTRAL AUTH STATE ═══════════════════
+     Single source of truth. After we prove the user is authed, no stray API
+     failure is allowed to hide the dashboard again. */
+  var authOk = null;    // null=unknown, true=authed, false=not authed
+  var liveTimer = null;
+
+  function showAuth(){
+    authOk = false;
+    $('authWall').classList.add('show');
+    $('mainContent').style.display = 'none';
+  }
+  function showDash(){
+    authOk = true;
+    $('authWall').classList.remove('show');
+    $('mainContent').style.display = 'flex';
+  }
+
+  function fetchJSON(path, opts){
+    opts = opts || {};
+    opts.credentials = 'same-origin';
+    opts.cache = 'no-store';
+    return fetch(path, opts).then(function(r){
+      if (r.status === 401) {
+        if (authOk === null) { showAuth(); }
+        var e = new Error('unauth'); e.status=401; throw e;
+      }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
+  }
+
+  /* ═══════════════════ AUTH: LOGIN / LOGOUT / TEST-MODE ═══════════════════ */
+  function doLogin(){
+    var t = $('tokenInput').value.trim();
+    if (!t) { $('loginErr').textContent = 'أدخل كلمة المرور'; return; }
+    $('loginBtn').disabled = true;
+    $('loginErr').textContent = '';
+    fetch('/admin/login', {
+      method:'POST', credentials:'same-origin', cache:'no-store',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ token:t })
+    }).then(function(r){ return r.json().then(function(d){ return {status:r.status, body:d}; }); })
+      .then(function(res){
+        if (res.body && res.body.ok) {
+          $('tokenInput').value = '';
+          showDash();
+          boot();
+        } else {
+          $('loginErr').textContent = 'كلمة المرور غلط';
+        }
+      })
+      .catch(function(){ $('loginErr').textContent = 'خطأ في الاتصال'; })
+      .finally(function(){ $('loginBtn').disabled = false; });
+  }
+  $('loginBtn').addEventListener('click', doLogin);
+  $('tokenInput').addEventListener('keydown', function(e){ if(e.key==='Enter')doLogin(); });
+
+  $('logoutBtn').addEventListener('click', function(){
+    fetch('/admin/logout', { method:'POST', credentials:'same-origin' })
+      .finally(function(){ location.reload(); });
+  });
+
+  $('testModeBtn').addEventListener('click', function(){
+    var tok = prompt('ADMIN_TOKEN لتفعيل/إيقاف وضع القياس الداخلي:\n(كل زيارة بعد التفعيل تُصنَّف INTERNAL وتُستبعد من التحليلات)');
+    if (!tok) return;
+    var on = confirm('OK = تفعيل، Cancel = إيقاف.');
+    fetch('/internal/toggle', { method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'}, body:JSON.stringify({ token:tok, on:on }) })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ alert(d.ok ? (on?'✓ Internal mode مفعل':'✓ Internal mode متوقف') : '✗ فشل'); })
+      .catch(function(){ alert('خطأ في الاتصال'); });
+  });
+
+  /* ═══════════════════ FILTERS ═══════════════════ */
+  var FILTER_KEYS = {
+    f_from:'from', f_to:'to', f_source:'source', f_device:'device_type',
+    f_os:'os', f_browser:'browser', f_classification:'classification',
+    f_inapp:'in_app', f_visitor:'visitor_id'
+  };
+  function readFilters(){
+    var q = {};
+    for (var id in FILTER_KEYS) {
+      var v = ($(id).value || '').trim();
+      if (v) q[FILTER_KEYS[id]] = v;
+    }
+    var iv = ($('f_internal').value || '').trim();
+    if (iv === '1') { q.exclude_internal = '0'; q.classification = 'internal'; }
+    return q;
+  }
+  function filterQS(){
+    var q = readFilters(); var parts = [];
+    for (var k in q) parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(q[k]));
+    return parts.length ? '?' + parts.join('&') : '';
+  }
+  function renderActiveBadges(){
+    var q = readFilters(); var box = $('activeBadges'); box.innerHTML = '';
+    var human = { from:'من', to:'إلى', source:'مصدر', device_type:'جهاز', os:'OS',
+      browser:'متصفح', classification:'تصنيف', in_app:'in-app', visitor_id:'Visitor' };
+    for (var k in q) {
+      if (k === 'exclude_internal') continue;
+      var b = document.createElement('span'); b.className = 'badge-f';
+      b.innerHTML = '<b>'+esc(human[k]||k)+':</b> '+esc(q[k])+' <span class="x" data-k="'+esc(k)+'">×</span>';
+      box.appendChild(b);
+    }
+    Array.prototype.forEach.call(box.querySelectorAll('.x'), function(x){
+      x.addEventListener('click', function(){
+        var k = x.getAttribute('data-k');
+        for (var id in FILTER_KEYS) if (FILTER_KEYS[id] === k) $(id).value = '';
+        if (k === 'classification') $('f_internal').value = '';
+        applyFilters();
+      });
+    });
+  }
+  function applyFilters(){ if (authOk === true) { renderActiveBadges(); refreshAll(); } }
+  var FIDS = Object.keys(FILTER_KEYS).concat(['f_internal']);
+  FIDS.forEach(function(id){
+    var el = $(id);
+    if (el.tagName === 'SELECT') el.addEventListener('change', applyFilters);
+    else el.addEventListener('change', applyFilters);
+  });
+  $('f_apply').addEventListener('click', applyFilters);
+  $('f_clear').addEventListener('click', function(){
+    FIDS.forEach(function(id){ $(id).value = ''; }); applyFilters();
+  });
+  $('filtersToggle').addEventListener('click', function(){
+    $('filtersBox').classList.toggle('open');
+  });
+
+  /* ═══════════════════ RENDERERS ═══════════════════ */
+  function stateOf(msg, err){
+    return '<div class="state'+(err?' err':'')+'">'+esc(msg)+'</div>';
+  }
+  function loadingOf(){ return '<div class="state"><span class="spinner"></span>جاري التحميل…</div>'; }
+
+  function bars(container, rows, opts){
+    opts = opts || {};
+    if (!rows || !rows.length) { container.innerHTML = stateOf(opts.empty || 'لا توجد بيانات'); return; }
+    var max = 0; rows.forEach(function(r){ if ((r.n||r.sessions||0) > max) max = r.n||r.sessions||0; });
+    container.innerHTML = '<div class="bars">' + rows.slice(0, opts.limit || 8).map(function(r){
+      var count = r.n != null ? r.n : (r.sessions || 0);
+      var name = opts.label ? opts.label(r) : (r.k || '—');
+      var pct = max ? Math.round(count * 100 / max) : 0;
+      var meta = opts.meta ? opts.meta(r) : '';
+      var cls = typeof opts.cls === 'function' ? opts.cls(r) : (opts.cls || '');
+      return '<div class="bar-row">'
+        + '<div class="name" title="'+esc(name)+'">'+esc(name)+'</div>'
+        + '<div class="track"><div class="fill '+esc(cls)+'" style="width:'+pct+'%"></div></div>'
+        + '<div class="meta">'+meta+'</div>'
+        + '<div class="num">'+fmtNum(count)+'</div>'
+      + '</div>';
+    }).join('') + '</div>';
+  }
+
+  function renderKPIs(t, model){
+    var pvPer = t.sessions ? (t.pageviews / t.sessions).toFixed(1) : '—';
+    var bouncePct = t.sessions ? pctOf(t.bounce_sessions, t.sessions) : null;
+    var humanPct = t.sessions ? pctOf(t.human_sessions, t.sessions) : 0;
+    var kpi = function(cls, label, val, sub){
+      return '<div class="kpi '+cls+'">'
+        + '<div class="lbl"><span class="dot"></span>'+esc(label)+'</div>'
+        + '<div class="val">'+esc(String(val))+'</div>'
+        + (sub ? '<div class="sub">'+esc(sub)+'</div>' : '')
+      + '</div>';
+    };
+    var html = '';
+    html += kpi('human', 'زوار — HUMAN_LIKELY', fmtNum(t.human_visitors||0),
+                'من ' + fmtNum(t.visitors||0) + ' زائر خارجي');
+    html += kpi('human', 'جلسات — HUMAN_LIKELY', fmtNum(t.human_sessions||0),
+                humanPct + '% من الجلسات');
+    html += kpi('info',  'إجمالي الجلسات', fmtNum(t.sessions||0),
+                'خارجية فقط، غير مكررة');
+    html += kpi('info',  'زوار راجعون', fmtNum(t.returning_visitors||0),
+                'زاروا أكثر من مرة');
+    html += kpi('',      'Pageviews', fmtNum(t.pageviews||0),
+                pvPer + ' / جلسة');
+    html += kpi('info',  'متوسط المدة',
+                t.avg_duration_s != null ? fmtDur(t.avg_duration_s) : '—',
+                'على ' + (t.duration_sample_n||0) + ' جلسة صالحة');
+    html += kpi('info',  'وسيط المدة',
+                t.median_duration_s != null ? fmtDur(t.median_duration_s) : '—',
+                'p90: ' + (t.p90_duration_s != null ? fmtDur(t.p90_duration_s) : '—'));
+    html += kpi('bot',   'BOT', fmtNum(t.bot_sessions||0),
+                bouncePct != null ? 'bounce ≈ '+bouncePct+'%' : 'كراولرز/أتمتة');
+    html += kpi('',      'UNKNOWN', fmtNum(t.unknown_sessions||0),
+                'أدلة غير كافية');
+    if (t.suspicious_sessions) html += kpi('warn', 'SUSPICIOUS', fmtNum(t.suspicious_sessions),
+                                           'أنماط أتمتة');
+    if (t.preview_sessions) html += kpi('info',   'SOCIAL PREVIEW', fmtNum(t.preview_sessions),
+                                        'link previews');
+    if (t.live_now != null) html += kpi('human', 'Live الآن', fmtNum(t.live_now),
+                                        'نشاط آخر 5د');
+    if (t.internal_sessions) html += kpi('warn', 'Internal / Test — مستبعد',
+                                         fmtNum(t.internal_sessions),
+                                         'رقم منفصل — خارج المجاميع');
+    $('kpiRow').innerHTML = html;
+
+    // Reconciliation panel
+    var primarySum = (t.human_sessions||0) + (t.bot_sessions||0) + (t.unknown_sessions||0)
+                   + (t.suspicious_sessions||0) + (t.preview_sessions||0);
+    var eqOk = primarySum === (t.sessions||0);
+    var gapM = Math.round((model && model.session_gap_s || 1800) / 60);
+    $('reconBox').innerHTML =
+      '<b style="color:var(--gold-hi)">التسوية:</b> '
+      + '<span class="mono">visitors=' + (t.visitors||0) + '</span> ≤ '
+      + '<span class="mono">sessions=' + (t.sessions||0) + '</span> ≤ '
+      + '<span class="mono">pageviews=' + (t.pageviews||0) + '</span>'
+      + ' — <b style="color:'+(eqOk?'var(--emerald)':'var(--amber)')+'">'
+      + 'HUMAN+BOT+UNKNOWN+SUSPICIOUS+PREVIEW = ' + primarySum + '</b> '
+      + (eqOk ? '✓ يطابق sessions' : '⚠ ' + (t.sessions - primarySum) + ' غير مصنَّفة')
+      + '<br><b>ملاحظة:</b> نفس الزائر يقدر يفتح كذا جلسة — أي فاصل خمول أطول من '
+      + gapM + ' دقيقة يبدأ جلسة جديدة. كل refresh لنفس المسار داخل 60 ثانية يُعدّ pageview إضافي، مش زائر جديد.'
+      + (t.internal_sessions ? '<br><span style="color:var(--gold-hi);font-weight:700">Internal/Test: '
+         + t.internal_sessions + ' جلسة اختبارية — مستبعدة تماماً من كل الأرقام أعلاه.</span>' : '');
+  }
+
+  function renderTimeChart(overTime){
+    var svg = $('timeChart');
+    if (!overTime || !overTime.length) {
+      $('timeChart').parentNode.innerHTML = stateOf('لا توجد بيانات كافية');
+      return;
+    }
+    var W=600, H=150, PAD=20;
+    var max = 0; overTime.forEach(function(r){ if((r.sessions||0)>max)max=r.sessions||0; });
+    if (max === 0) max = 1;
+    var stepX = overTime.length > 1 ? (W - PAD*2) / (overTime.length - 1) : 0;
+    var y = function(v){ return H - PAD - (v / max) * (H - PAD*2); };
+    var pts = overTime.map(function(r,i){ return [PAD + i*stepX, y(r.sessions||0)]; });
+    var hpts = overTime.map(function(r,i){ return [PAD + i*stepX, y(r.human||0)]; });
+    var toStr = function(a){ return a.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' '); };
+    var area = toStr(pts) + ' ' + (PAD + (overTime.length-1)*stepX) + ',' + (H-PAD) + ' ' + PAD + ',' + (H-PAD);
+    // grid
+    var grid = '';
+    for (var i=0;i<4;i++) {
+      var yy = PAD + i*((H-PAD*2)/3);
+      grid += '<line class="grid" x1="'+PAD+'" y1="'+yy+'" x2="'+(W-PAD)+'" y2="'+yy+'"/>';
+    }
+    // axis labels (first & last hour)
+    var axisFirst = overTime[0].hour ? overTime[0].hour.slice(-2)+':00' : '';
+    var axisLast = overTime[overTime.length-1].hour ? overTime[overTime.length-1].hour.slice(-2)+':00' : '';
+    var svgInner =
+      '<defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0%" stop-color="#c9a24b" stop-opacity=".35"/>'
+      + '<stop offset="100%" stop-color="#c9a24b" stop-opacity="0"/></linearGradient></defs>'
+      + grid
+      + '<polygon class="area" points="'+area+'" fill="url(#areaGrad)"/>'
+      + '<polyline class="line" points="'+toStr(pts)+'"/>'
+      + '<polyline class="line line-h" points="'+toStr(hpts)+'" style="opacity:.75"/>'
+      + '<text class="axis" x="'+PAD+'" y="'+(H-4)+'">'+esc(axisFirst)+'</text>'
+      + '<text class="axis" x="'+(W-PAD)+'" y="'+(H-4)+'" text-anchor="end">'+esc(axisLast)+'</text>'
+      + '<text class="axis" x="'+PAD+'" y="'+(PAD-6)+'">Max ' + max + '</text>';
+    svg.innerHTML = svgInner;
+    $('overTimeSub').textContent = 'المجموع خط الذهب • البشري خط الأخضر • ' + overTime.length + ' ساعة';
+  }
+
+  function renderClassification(rows){
+    if (!rows || !rows.length) { $('clsChart').innerHTML = stateOf('لا توجد بيانات'); return; }
+    var opts = {
+      label: function(r){ return CLASS_LABELS[r.k] || (r.k||'unknown').toUpperCase(); },
+      cls: function(r){
+        if (r.k === 'human_likely') return 'human';
+        if (r.k === 'bot') return '';
+        if (r.k === 'suspicious') return 'gold';
+        return 'info';
+      },
+      meta: function(r){ return ''; },
+      limit: 6
+    };
+    bars($('clsChart'), rows, opts);
+  }
+
+  function renderOverview(o){
+    // sources with human count + avg duration
+    bars($('srcChart'), o.bySource, {
+      label: function(r){ return r.k || 'direct'; },
+      meta: function(r){
+        var parts = [];
+        if (r.human) parts.push('👤' + r.human);
+        if (r.avg_dur) parts.push(fmtDur(Math.round(r.avg_dur)));
+        return parts.join(' · ');
+      },
+      cls: 'human', empty: 'لا مصادر بعد', limit: 8
+    });
+    bars($('devChart'), o.byDevice, {
+      label: function(r){ return (r.k||'unknown').toUpperCase(); },
+      meta: function(r){ return r.human ? '👤' + r.human : ''; },
+      cls: function(r){ return r.k === 'mobile' ? 'human' : (r.k === 'desktop' ? 'gold' : 'info'); }
+    });
+    bars($('osChart'), o.byOs, {
+      label: function(r){ return r.k || 'Unknown'; },
+      meta: function(r){ return r.human ? '👤' + r.human : ''; },
+      cls: 'gold'
+    });
+    bars($('brChart'), o.byBrowser, {
+      label: function(r){ return r.k || 'Unknown'; },
+      meta: function(r){ return r.human ? '👤' + r.human : ''; },
+      cls: 'info'
+    });
+    bars($('vendorChart'), o.byVendor, {
+      label: function(r){ return r.k || 'Unknown'; },
+      meta: function(r){ return r.human ? '👤' + r.human : ''; },
+      cls: 'gold', empty: 'لم نتعرّف على أجهزة'
+    });
+    bars($('inappChart'), o.byInApp, {
+      label: function(r){ return r.k || 'Unknown'; },
+      cls: 'info', empty: 'لا توجد جلسات in-app'
+    });
+    renderClassification(o.byClassification);
+    renderTimeChart(o.overTime);
+  }
+
+  function renderSessions(rows){
+    var tbody = $('sessBody');
+    if (!rows || !rows.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="exp">'+stateOf('لا جلسات بهذه الفلاتر')+'</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(function(s){
+      var dev = deviceLabel(s);
+      return '<tr class="row-click" data-sid="'+esc(s.id)+'">'
+        + '<td>'+esc(fmtDT(s.started_at))+'</td>'
+        + '<td><span class="id" title="'+esc(s.visitor_id)+'">'+esc(shortId(s.visitor_id))+'</span>'
+        + (s.visit_count>1 ? ' <span class="pill" style="padding:0 6px;font-size:.62rem">×'+s.visit_count+'</span>' : '') + '</td>'
+        + '<td>'+esc(s.source||'direct')+'</td>'
+        + '<td>'+esc(dev)+'</td>'
+        + '<td>'+esc(s.os||'—')+'</td>'
+        + '<td>'+esc(s.browser||'—')+(s.in_app_app?' <span class="pill" style="padding:0 5px">'+esc(s.in_app_app)+'</span>':'')+'</td>'
+        + '<td class="mono">'+esc(String(s.pageviews||1))+'</td>'
+        + '<td class="mono">'+esc(fmtDur(s.duration_s))+'</td>'
+        + '<td>'+pill(s.classification, s.confidence)+'</td>'
+      + '</tr>';
+    }).join('');
+    Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function(tr){
+      tr.addEventListener('click', function(){ openDrawer(tr.getAttribute('data-sid')); });
+    });
+  }
+
+  function renderLive(rows){
+    var tbody = $('liveBody');
+    $('liveNum').textContent = rows ? rows.length : 0;
+    $('livePill').classList.toggle('zero', !rows || !rows.length);
+    if (!rows || !rows.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="exp"><div class="state">مافيش نشاط حالياً</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(function(s){
+      var age = agoSec(s.last_activity_at);
+      var dev = deviceLabel(s);
+      return '<tr class="row-click" data-sid="'+esc(s.id)+'">'
+        + '<td>'+ (age!=null ? age+'ث' : '—') +'</td>'
+        + '<td><span class="id" title="'+esc(s.visitor_id)+'">'+esc(shortId(s.visitor_id))+'</span></td>'
+        + '<td class="mono">'+esc(s.current_path||'/')+'</td>'
+        + '<td>'+esc(s.source||'direct')+'</td>'
+        + '<td>'+esc(dev)+'</td>'
+        + '<td>'+esc(s.browser||'—')+(s.in_app_app?' <span class="pill" style="padding:0 5px">'+esc(s.in_app_app)+'</span>':'')+'</td>'
+        + '<td>'+pill(s.classification, s.confidence)+'</td>'
+        + '<td class="mono">'+esc(String(s.pageviews||1))+'</td>'
+      + '</tr>';
+    }).join('');
+    Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function(tr){
+      tr.addEventListener('click', function(){ openDrawer(tr.getAttribute('data-sid')); });
+    });
+  }
+
+  function renderInternal(rows){
+    if (!rows || !rows.length) { $('internalCard').style.display = 'none'; return; }
+    $('internalCard').style.display = '';
+    $('internalBody').innerHTML =
+      '<div class="table-wrap"><table>'
+      + '<thead><tr><th>بدأت</th><th>Visitor</th><th>الجهاز</th><th>المتصفح</th><th>Pageviews</th><th>المدة</th></tr></thead>'
+      + '<tbody>' + rows.slice(0, 20).map(function(s){
+        return '<tr class="row-click" data-sid="'+esc(s.id)+'">'
+          + '<td>'+esc(fmtDT(s.started_at))+'</td>'
+          + '<td><span class="id">'+esc(shortId(s.visitor_id))+'</span></td>'
+          + '<td>'+esc(deviceLabel(s))+'</td>'
+          + '<td>'+esc(s.browser||'—')+'</td>'
+          + '<td class="mono">'+esc(String(s.pageviews||1))+'</td>'
+          + '<td class="mono">'+esc(fmtDur(s.duration_s))+'</td>'
+        + '</tr>';
+      }).join('') + '</tbody></table></div>';
+    Array.prototype.forEach.call($('internalBody').querySelectorAll('tr'), function(tr){
+      tr.addEventListener('click', function(){ openDrawer(tr.getAttribute('data-sid')); });
+    });
+  }
+
+  /* ═══════════════════ SESSION DRAWER ═══════════════════ */
+  function closeDrawer(){
+    $('drawer').classList.remove('open'); $('veil').classList.remove('open');
+    $('drawer').setAttribute('aria-hidden','true');
+  }
+  $('drawerClose').addEventListener('click', closeDrawer);
+  $('veil').addEventListener('click', closeDrawer);
+
+  function openDrawer(sid){
+    if (!sid) return;
+    $('drawer').classList.add('open'); $('veil').classList.add('open');
+    $('drawer').setAttribute('aria-hidden','false');
+    $('drawerBody').innerHTML = loadingOf();
+    fetchJSON('/admin/api/session.json?id=' + encodeURIComponent(sid))
+      .then(function(d){
+        var s = d.session; var timeline = d.timeline || [];
+        var reasons = [];
+        try { reasons = JSON.parse(s.classification_reasons || '[]') || []; } catch(e) {}
+        var kv = function(k, v){ return '<dt>'+esc(k)+'</dt><dd>'+ (v==null||v===''?'—':esc(String(v))) +'</dd>'; };
+        var html = '';
+        html += '<div class="dsec"><h4>التصنيف</h4>'
+          + '<div style="font-size:1.1rem;margin-bottom:8px">'
+          + pill(s.classification, s.confidence)
+          + '</div>'
+          + '<ul class="reasons">'
+          + (reasons.length ? reasons.map(function(r){
+              return '<li class="'+esc(r.kind||'none')+'">'+esc(r.text||'—')
+                +'<span class="w">+'+(r.w||0)+'</span></li>';
+            }).join('') : '<li class="none">لا توجد أدلة موزونة</li>')
+          + '</ul></div>';
+        html += '<div class="dsec"><h4>بيانات الجلسة</h4><dl class="kv">'
+          + kv('Session ID', s.id)
+          + kv('Visitor ID', s.visitor_id)
+          + kv('زيارات الزائر', s.visit_count || 1)
+          + kv('بدأت', fmtDT(s.started_at))
+          + kv('آخر نشاط', fmtDT(s.last_activity_at))
+          + kv('مدة (جدار الوقت)', fmtDur(s.duration_s))
+          + kv('مدة نشطة (Client)', fmtDur(s.active_duration_s))
+          + kv('Pageviews', s.pageviews || 1)
+          + kv('Refreshes', s.refresh_count || 0)
+          + kv('Events', s.event_count || 0)
+          + kv('المصدر', s.source || 'direct')
+          + kv('Referrer', s.referrer)
+          + kv('الجهاز', deviceLabel(s))
+          + kv('OS', (s.os||'—') + (s.os_version ? ' ' + s.os_version : ''))
+          + kv('المتصفح', (s.browser||'—') + (s.browser_version ? ' ' + s.browser_version : ''))
+          + kv('In-app', s.in_app_app || (s.is_inapp ? 'نعم' : 'لا'))
+          + kv('Internal', s.is_internal ? 'نعم — Test' : 'لا')
+          + '</dl></div>';
+        html += '<div class="dsec"><h4>الخط الزمني ('+ timeline.length +' حدث)</h4><div class="timeline">'
+          + (timeline.length ? timeline.map(function(e){
+              var detail = ''; try {
+                var x = JSON.parse(e.extra || '{}');
+                if (x.href) detail = x.href;
+                else if (x.state) detail = 'tab: ' + x.state;
+                else if (x.refresh) detail = '↻ refresh';
+              } catch(_) {}
+              return '<div class="tl-row">'
+                + '<span class="t">'+esc(String(e.ts||'').slice(11,19))+'</span>'
+                + '<span class="ty '+esc(e.type||'')+'">'+esc(e.type||'')+'</span>'
+                + '<span class="d">'+esc(e.path||'')+(detail?' — '+esc(detail):'')+'</span>'
+              + '</div>';
+            }).join('') : '<div class="state">لا أحداث مسجلة لهذه الجلسة</div>')
+          + '</div></div>';
+        $('drawerBody').innerHTML = html;
+      })
+      .catch(function(e){
+        $('drawerBody').innerHTML = stateOf('تعذر تحميل تفاصيل الجلسة: '+(e.message||''), true);
+      });
+  }
+
+  /* ═══════════════════ REFRESH PIPELINE ═══════════════════ */
+  function updateTs(){
+    $('updatedAt').textContent = new Date().toLocaleTimeString('en-GB',{hour12:false});
+  }
+
+  function refreshAll(){
+    if (authOk !== true) return;
+    var qs = filterQS();
+    updateTs();
+
+    $('kpiRow').innerHTML = loadingOf();
+    fetchJSON('/admin/api/summary.json' + qs).then(function(d){
+      renderKPIs(d.totals || {}, d.model || {});
+    }).catch(function(e){
+      if (e.status === 401) return;
+      $('kpiRow').innerHTML = stateOf('تعذر تحميل الملخّص: '+(e.message||''), true);
+    });
+
+    fetchJSON('/admin/api/overview.json' + qs).then(renderOverview).catch(function(e){
+      if (e.status === 401) return;
+      $('srcChart').innerHTML = stateOf('تعذر تحميل نظرة عامة', true);
+    });
+
+    fetchJSON('/admin/api/sessions.json' + qs + (qs?'&':'?') + 'limit=' + ($('sessLimit').value||200))
+      .then(renderSessions).catch(function(e){
+        if (e.status === 401) return;
+        $('sessBody').innerHTML = '<tr><td colspan="9" class="exp">'
+          + stateOf('تعذر تحميل الجلسات', true) + '</td></tr>';
+      });
+
+    // internal-only, side channel
+    fetchJSON('/admin/api/sessions.json?classification=internal&exclude_internal=0&limit=50')
+      .then(renderInternal).catch(function(){});
+
+    refreshLive();
+  }
+
+  function refreshLive(){
+    if (authOk !== true) return;
+    fetchJSON('/admin/api/live.json').then(renderLive).catch(function(e){
+      if (e.status === 401) return;
+    });
+  }
+
+  $('sessLimit').addEventListener('change', refreshAll);
+  $('refreshBtn').addEventListener('click', refreshAll);
+  $('liveRefresh').addEventListener('click', refreshLive);
+
+  /* export — always FULL data (respects filters when active) */
+  $('exportBtn').addEventListener('click', function(){
+    var btn = $('exportBtn'); var orig = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span> جاري…'; btn.disabled = true;
+    fetch('/admin/api/export.json' + filterQS(), { credentials:'same-origin', cache:'no-store' })
+      .then(function(r){ if (!r.ok) throw new Error('HTTP '+r.status); return r.blob(); })
+      .then(function(blob){
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'alucard-analytics-full-' + new Date().toISOString().slice(0,10) + '.json';
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 100);
+      })
+      .catch(function(e){ alert('فشل التصدير: ' + (e.message||'')); })
+      .finally(function(){ btn.innerHTML = orig; btn.disabled = false; });
+  });
+
+  /* ═══════════════════ BOOT ═══════════════════ */
+  function bootstrapAuth(){
+    return fetch('/admin/api/summary.json', { credentials:'same-origin', cache:'no-store' })
+      .then(function(r){
+        if (r.status === 401) { showAuth(); return false; }
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json().then(function(){ showDash(); return true; });
+      })
+      .catch(function(){ showAuth(); return false; });
+  }
+
+  function boot(){
+    refreshAll();
+    if (liveTimer) clearInterval(liveTimer);
+    liveTimer = setInterval(function(){ if (authOk === true) refreshLive(); }, 10000);
+  }
+
+  // SINGLE entry point.
+  bootstrapAuth().then(function(ok){ if (ok) boot(); });
+
+})();
+</script>
+</body>
+</html>

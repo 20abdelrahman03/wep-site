@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALUCARD — الخصوصية</title>
+<meta name="theme-color" content="#0a0809">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0809;--ink2:#100b0d;--panel:#141014;--panel2:#191319;
+  --line:#241c20;--line2:#33262c;--text:#e9e2d8;--mut:#9c9186;
+  --gold:#c9a24b;--gold-hi:#e8c877;--gold-lo:#8a6d2c;
+  --blood:#8e1c22;--blood-hi:#c22f37;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font:400 17px/1.9 "Cairo",system-ui,sans-serif;padding:40px 20px 60px}
+body::before{content:"";position:fixed;inset:0;z-index:-1;
+  background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.016) 0 2px,transparent 2px 4px),
+    repeating-linear-gradient(-45deg,rgba(0,0,0,.35) 0 2px,transparent 2px 4px);
+  background-size:8px 8px}
+main{max-width:700px;margin:0 auto}
+.brand{font:900 1.1rem Cinzel,serif;color:var(--gold-lo);letter-spacing:.2em;direction:ltr;display:block;margin-bottom:28px}
+h1{font:900 clamp(1.5rem,4vw,2rem)/1.2 Cairo;color:var(--text);margin-bottom:8px}
+.kicker{color:var(--blood-hi);font-weight:700;font-size:.78rem;letter-spacing:.22em;
+  text-transform:uppercase;display:block;margin-bottom:6px}
+.lead{color:var(--mut);margin-bottom:32px}
+
+.block{background:linear-gradient(150deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin-bottom:14px;
+  position:relative}
+.block::before{content:"";position:absolute;top:-1px;right:14px;left:14px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line2),transparent)}
+.block h2{color:var(--gold-hi);font-size:.95rem;font-weight:900;margin-bottom:8px}
+.block p{color:var(--mut);font-size:.92rem}
+.block p+p{margin-top:8px}
+.block ul{color:var(--mut);font-size:.92rem;padding-right:18px;margin-top:6px}
+.block li{margin-bottom:4px}
+.block b{color:var(--text)}
+
+.back{display:inline-flex;align-items:center;gap:8px;margin-top:28px;
+  color:var(--mut);text-decoration:none;font-size:.85rem;
+  border:1px solid var(--line2);border-radius:8px;padding:8px 14px;
+  transition:color .15s,border-color .15s}
+.back:hover{color:var(--gold-hi);border-color:var(--gold-lo)}
+</style>
+</head>
+<body>
+<main>
+  <a class="brand" href="/">ALUCARD</a>
+  <span class="kicker">الخصوصية</span>
+  <h1>الموقع بيسجّل إيه بالظبط</h1>
+  <p class="lead">موقع شخصي صغير — مفيش شركة، مفيش إعلانات، مفيش تتبع خارجي.</p>
+
+  <div class="block">
+    <h2>اللي بيتسجّل</h2>
+    <ul>
+      <li><b>معرّف مجهول عشوائي</b> — 32 حرف hex، بيتخزن في كوكي على جهازك. مش مرتبط باسم أو حساب أو إيميل.</li>
+      <li><b>الصفحة اللي زرتها</b> ووقت الزيارة.</li>
+      <li><b>مصدر الزيارة</b> (يعني جيت من فين — بدون URL كامل).</li>
+      <li><b>معلومات البيئة (تقريبية)</b>: نوع الجهاز، المتصفح، المنطقة الزمنية، حجم الشاشة تقريباً، نوع الاتصال.</li>
+      <li><b>IP مشفّر</b> — بيتخزن كـ HMAC-SHA256 مع salt سري. مش ممكن يتفك تشفيره.</li>
+      <li><b>هل المتصفح من داخل تطبيق</b> — زي إنستجرام أو فيسبوك (ده الهدف الأساسي من التحليلات).</li>
+    </ul>
+  </div>
+
+  <div class="block">
+    <h2>اللي مش بيتسجّل</h2>
+    <ul>
+      <li>الاسم، الإيميل، أي بيانات شخصية.</li>
+      <li>IP كامل قابل للقراءة.</li>
+      <li>تتبع عبر مواقع تانية.</li>
+      <li>كوكيز تتبع خارجية.</li>
+      <li>أي بيانات بيعها لطرف تالت — مفيش طرف تالت أصلاً.</li>
+    </ul>
+  </div>
+
+  <div class="block">
+    <h2>الكوكيز</h2>
+    <p><b>avid</b> — معرّف الزائر المجهول. بيستنى سنة. HttpOnly، مش قابل للقراءة من JavaScript.</p>
+    <p><b>asid</b> — معرّف الجلسة. بيستنى ٣٠ دقيقة من آخر نشاط. HttpOnly.</p>
+    <p>لو حذفت الكوكيز، الموقع هيشوفك زائر جديد — مفيش أي طريقة تانية يربطك بزياراتك السابقة.</p>
+  </div>
+
+  <div class="block">
+    <h2>التخزين</h2>
+    <p>البيانات بتتخزن على <b>Cloudflare D1</b> (قاعدة بيانات على Edge). مفيش Google Analytics، مفيش Mixpanel، مفيش أي خدمة خارجية.</p>
+  </div>
+
+  <a class="back" href="/">← رجوع للموقع</a>
+</main>
+</body>
+</html>
