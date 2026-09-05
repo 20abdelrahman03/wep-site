@@ -95,87 +95,6 @@ async function guardAdmin(request, env) {
   return Response.redirect(new URL('/admin/login', request.url), 302);
 }
 
-/* ───────────────────────── schema migrations (idempotent) ───────────────────────── */
-
-const MIGRATION_COLS = [
-  ['sessions', 'last_activity_at', 'TEXT'],
-  ['sessions', 'ended_at', 'TEXT'],
-  ['sessions', 'duration_s', 'REAL'],
-  ['sessions', 'active_duration_s', 'REAL'],
-  ['sessions', 'pageviews', 'INTEGER NOT NULL DEFAULT 1'],
-  ['sessions', 'event_count', 'INTEGER NOT NULL DEFAULT 0'],
-  ['sessions', 'refresh_count', 'INTEGER NOT NULL DEFAULT 0'],
-  ['sessions', 'source', 'TEXT'],
-  ['sessions', 'referrer', 'TEXT'],
-  ['sessions', 'is_ig_inapp', 'INTEGER NOT NULL DEFAULT 0'],
-  ['sessions', 'is_inapp', 'INTEGER NOT NULL DEFAULT 0'],
-  ['sessions', 'in_app_app', 'TEXT'],
-  ['sessions', 'device_type', 'TEXT'],
-  ['sessions', 'device_vendor', 'TEXT'],
-  ['sessions', 'device_model', 'TEXT'],
-  ['sessions', 'os', 'TEXT'],
-  ['sessions', 'os_version', 'TEXT'],
-  ['sessions', 'browser', 'TEXT'],
-  ['sessions', 'browser_version', 'TEXT'],
-  ['sessions', 'classification', 'TEXT'],
-  ['sessions', 'confidence', 'INTEGER'],
-  ['sessions', 'classification_reasons', 'TEXT'],
-  ['sessions', 'is_internal', 'INTEGER NOT NULL DEFAULT 0'],
-  ['sessions', 'internal_override', 'INTEGER NOT NULL DEFAULT 0'],
-  ['sessions', 'ua', 'TEXT'],
-  ['sessions', 'js_beacons', 'INTEGER NOT NULL DEFAULT 0'],
-  ['sessions', 'heartbeats', 'INTEGER NOT NULL DEFAULT 0'],
-  ['sessions', 'interactions', 'INTEGER NOT NULL DEFAULT 0'],
-  ['sessions', 'distinct_paths', 'INTEGER NOT NULL DEFAULT 1'],
-  ['visitors', 'classification_summary', 'TEXT'],
-];
-const MIGRATION_IDX = [
-  'CREATE INDEX IF NOT EXISTS idx_sessions_visitor ON sessions(visitor_id)',
-  'CREATE INDEX IF NOT EXISTS idx_sessions_started ON sessions(started_at)',
-  'CREATE INDEX IF NOT EXISTS idx_sessions_last_act ON sessions(last_activity_at)',
-  'CREATE INDEX IF NOT EXISTS idx_events_session ON events(session_id)',
-  'CREATE INDEX IF NOT EXISTS idx_events_session_type ON events(session_id, type)',
-];
-
-async function runMigrations(db) {
-  for (const [tbl, col, def] of MIGRATION_COLS) {
-    try { await db.prepare(`ALTER TABLE ${tbl} ADD COLUMN ${col} ${def}`).run(); }
-    catch (e) { /* already exists — expected */ }
-  }
-  for (const sql of MIGRATION_IDX) {
-    try { await db.prepare(sql).run(); } catch (e) { /* index exists */ }
-  }
-  await backfillLegacy(db);
-}
-
-/* One-time backfill: give legacy (pre-v2) sessions honest classifications by
-   reconstructing their counters from the events log. Runs as a no-op (one
-   cheap COUNT) once every legacy row is classified. */
-async function backfillLegacy(db) {
-  const nulls = (await db.prepare(
-    `SELECT COUNT(*) n FROM sessions WHERE classification IS NULL`).first() || {}).n || 0;
-  if (!nulls) return;
-  await db.prepare(`UPDATE sessions SET js_beacons = (
-      SELECT COUNT(*) FROM events e WHERE e.session_id = sessions.id AND e.type = 'beacon_env')
-    WHERE classification IS NULL AND js_beacons = 0`).run();
-  await db.prepare(`UPDATE sessions SET interactions = (
-      SELECT COUNT(*) FROM events e WHERE e.session_id = sessions.id AND e.type = 'link_click')
-    WHERE classification IS NULL AND interactions = 0`).run();
-  await db.prepare(`UPDATE sessions SET pageviews = MAX(1, (
-      SELECT COUNT(*) FROM events e WHERE e.session_id = sessions.id
-        AND e.type IN ('pageview','first_visit','returning_visit')))
-    WHERE classification IS NULL`).run();
-  await db.prepare(`UPDATE sessions SET last_activity_at = (
-      SELECT MAX(e.ts) FROM events e WHERE e.session_id = sessions.id)
-    WHERE classification IS NULL AND last_activity_at IS NULL`).run();
-  await db.prepare(`UPDATE sessions SET duration_s = MAX(0, CAST(
-      (julianday(COALESCE(last_activity_at, started_at)) - julianday(started_at)) * 86400 AS REAL))
-    WHERE classification IS NULL AND duration_s IS NULL AND last_activity_at IS NOT NULL`).run();
-  const rows = (await db.prepare(
-    `SELECT * FROM sessions WHERE classification IS NULL`).all()).results;
-  for (const s of rows) await classifyAndStore(db, s);
-}
-
 /* ───────────────────────── session model ───────────────────────── */
 
 function secBetween(aIso, bIso) {
@@ -259,6 +178,7 @@ async function classifyAndStore(db, sess) {
     in_app_app: sess.in_app_app || null,
     is_internal: !!sess.is_internal || !!sess.internal_override,
     visitor_burst_sessions: burst,
+    webdriver: sess.webdriver === 1,
   };
   const r = classifySession(facts);
   await db.prepare(`
@@ -270,21 +190,32 @@ async function classifyAndStore(db, sess) {
 
 /* Update session activity bookkeeping. kind: 'pageview' | 'event' | 'heartbeat' */
 async function touchSession(db, sid, kind, opts = {}) {
-  const sets = ['last_activity_at = ?', 'event_count = event_count + 1'];
+  const inc = opts.eventIncrement || 1;
+  const sets = ['last_activity_at = ?', `event_count = event_count + ${inc}`];
   const vals = [opts.ts || nowIso()];
   if (kind === 'pageview') {
     sets.push('pageviews = pageviews + 1');
     if (opts.isRefresh) sets.push('refresh_count = refresh_count + 1');
     if (opts.newPath) sets.push('distinct_paths = distinct_paths + 1');
   }
-  if (kind === 'beacon')  sets.push('js_beacons = js_beacons + 1');
+  if (kind === 'beacon') {
+    sets.push('js_beacons = js_beacons + 1');
+    if (opts.webdriver != null) {
+      sets.push('webdriver = ?');
+      vals.push(opts.webdriver ? 1 : 0);
+    }
+  }
   if (kind === 'click')   sets.push('interactions = interactions + 1');
   if (kind === 'heartbeat') sets.push('heartbeats = heartbeats + 1');
   // Client-verified gesture evidence is idempotent (MAX, not +1): repeated
   // pings carrying the same gesture count must not inflate the signal.
   if (opts.gestureN != null && opts.gestureN > 0)
     sets.push('interactions = MAX(interactions, ?)'), vals.push(opts.gestureN);
-  if (opts.activeS != null) sets.push('active_duration_s = MAX(COALESCE(active_duration_s,0), ?)'), vals.push(opts.activeS);
+  if (opts.activeS != null && opts.activeS > 0) {
+    // Accumulate the verified delta sent by the client, up to a reasonable cap
+    sets.push('active_duration_s = COALESCE(active_duration_s, 0) + ?');
+    vals.push(opts.activeS);
+  }
   const dur = opts.wallS != null ? opts.wallS : null;
   if (dur != null) sets.push('duration_s = ?'), vals.push(dur);
   vals.push(sid);
@@ -333,8 +264,6 @@ export default {
     const sp = url.searchParams;
 
     try {
-      await runMigrations(db);
-
       /* ─────────── public: homepage (tracked pageview) ─────────── */
       if (p === '/' && request.method === 'GET') {
         const obs = extractRequestObservations(buildReqLike(request));
@@ -345,7 +274,7 @@ export default {
         // get logged into request_logs + a classified session row.
         let avidCookie = null, asidCookie = null;
 
-        if (!uaBot) {                       // previews get a session (social_preview class)
+        if (!uaBot && !uaPreview) {         // automated/preview traffic handled statelessly in 'else'
           let vid = getCookie(request, AVID);
           if (vid && !/^[a-f0-9]{32}$/.test(vid)) vid = null;
           const ts = nowIso();
@@ -371,7 +300,9 @@ export default {
             .bind(sid).first();
           const isRefresh = !!(lastPv && lastPv.path === obs.path
             && secBetween(lastPv.ts, sts) <= REFRESH_WINDOW_S);
-          const newPath = !(lastPv && lastPv.path === obs.path);
+          // A path is only "new" if there is a previous pageview in the session AND it differs.
+          // For the first pageview in a session, distinct_paths is already initialized to 1.
+          const newPath = !!(lastPv && lastPv.path !== obs.path);
 
           await db.prepare(`
             INSERT INTO events (visitor_id, session_id, ts, type, path, referrer, referrer_source,
@@ -393,7 +324,8 @@ export default {
               JSON.stringify({ session_start: true })).run();
 
           const wall = secBetween(sess.started_at, sts);
-          await touchSession(db, sid, 'pageview', { ts: sts, isRefresh, newPath, wallS: wall });
+          // 2 events inserted: 'pageview' and 'first_visit' / 'returning_visit'
+          await touchSession(db, sid, 'pageview', { ts: sts, isRefresh, newPath, wallS: wall, eventIncrement: 2 });
           const fresh = await db.prepare('SELECT * FROM sessions WHERE id = ?').bind(sid).first();
           await classifyAndStore(db, fresh);
 
@@ -467,6 +399,7 @@ export default {
 
         const ts = nowIso();
         const envJ = JSON.stringify(pl.env || {});
+
         await db.prepare(`
           INSERT INTO events (visitor_id, session_id, ts, type, path, referrer, referrer_source,
             is_ig_inapp, identity_mode, env, query_params, extra)
@@ -478,9 +411,9 @@ export default {
               languages: pl.env?.languages, timezone: pl.env?.timezone,
               screen_bucket: pl.env?.screen_bucket, connection: pl.env?.connection,
               standalone: pl.env?.standalone, in_app_app: pl.env?.in_app_app,
-              pcm_injected: pl.env?.pcm_injected })) .run();
+              pcm_injected: pl.env?.pcm_injected, webdriver: pl.env?.webdriver })) .run();
         const wall = secBetween(sess.started_at, ts);
-        await touchSession(db, sid, 'beacon', { ts, wallS: wall });
+        await touchSession(db, sid, 'beacon', { ts, wallS: wall, webdriver: pl.env?.webdriver });
         await classifyAndStore(db, await db.prepare('SELECT * FROM sessions WHERE id = ?').bind(sid).first());
         return jsonResponse({ ok: true });
       }
@@ -517,8 +450,9 @@ export default {
         const ts = nowIso();
         const activeS = Math.max(0, Math.min(parseInt(pl.active_s || 0, 10) || 0, 7200));
         const gestureN = Math.max(0, Math.min(parseInt(pl.gestures || 0, 10) || 0, 5));
+        const inc = pl.visibility_event ? 2 : 1; // heartbeat is 1 event, visibility is +1 if present
         await touchSession(db, sid, 'heartbeat', {
-          ts, activeS: activeS || null, wallS: secBetween(sess.started_at, ts), gestureN });
+          ts, activeS: activeS || null, wallS: secBetween(sess.started_at, ts), gestureN, eventIncrement: inc });
         // record visibility transitions as evidence events (sparse, not every ping)
         if (pl.visibility_event) {
           await db.prepare(`INSERT INTO events (visitor_id, session_id, ts, type, path, extra)
@@ -562,7 +496,7 @@ export default {
       }
 
       /* dashboard aliases — guarded */
-      if (p === '/dashboard' || p === '/dashboard.html') {
+      if (p === '/dashboard' || p.startsWith('/dashboard/') || p === '/dashboard.html') {
         const redir = await guardAdmin(request, env);
         if (redir) return redir;
         return env.ASSETS.fetch(new Request(new URL('/dashboard.html', request.url), request));
@@ -575,6 +509,33 @@ export default {
 
         if (p === '/admin' && request.method === 'GET')
           return env.ASSETS.fetch(new Request(new URL('/dashboard.html', request.url), request));
+
+        /* ── legacy backfill trigger (admin only) ── */
+        if (p === '/admin/api/migrate' && request.method === 'POST') {
+          const nulls = (await db.prepare(
+            `SELECT COUNT(*) n FROM sessions WHERE classification IS NULL`).first() || {}).n || 0;
+          if (!nulls) return jsonResponse({ ok: true, migrated: 0 });
+          await db.prepare(`UPDATE sessions SET js_beacons = (
+              SELECT COUNT(*) FROM events e WHERE e.session_id = sessions.id AND e.type = 'beacon_env')
+            WHERE classification IS NULL AND js_beacons = 0`).run();
+          await db.prepare(`UPDATE sessions SET interactions = (
+              SELECT COUNT(*) FROM events e WHERE e.session_id = sessions.id AND e.type = 'link_click')
+            WHERE classification IS NULL AND interactions = 0`).run();
+          await db.prepare(`UPDATE sessions SET pageviews = MAX(1, (
+              SELECT COUNT(*) FROM events e WHERE e.session_id = sessions.id
+                AND e.type IN ('pageview','first_visit','returning_visit')))
+            WHERE classification IS NULL`).run();
+          await db.prepare(`UPDATE sessions SET last_activity_at = (
+              SELECT MAX(e.ts) FROM events e WHERE e.session_id = sessions.id)
+            WHERE classification IS NULL AND last_activity_at IS NULL`).run();
+          await db.prepare(`UPDATE sessions SET duration_s = MAX(0, CAST(
+              (julianday(COALESCE(last_activity_at, started_at)) - julianday(started_at)) * 86400 AS REAL))
+            WHERE classification IS NULL AND duration_s IS NULL AND last_activity_at IS NOT NULL`).run();
+          const rows = (await db.prepare(
+            `SELECT * FROM sessions WHERE classification IS NULL LIMIT 500`).all()).results;
+          for (const s of rows) await classifyAndStore(db, s);
+          return jsonResponse({ ok: true, migrated: rows.length, remaining: Math.max(0, nulls - rows.length) });
+        }
 
         /* filters shared by every analytics endpoint */
         const f = {};

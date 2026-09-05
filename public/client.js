@@ -30,6 +30,7 @@
                   matchMedia('(display-mode: standalone)').matches,
       in_app_app: null,
       pcm_injected: false,
+      webdriver:  !!navigator.webdriver,
     }
   };
 
@@ -80,21 +81,34 @@
   var _lastActive  = Date.now();
   var _lastVisEvt  = null;
   var _interacted  = false;
+  var _lastSentMs  = 0; // track what we've already sent to calculate delta
 
-  function activeSeconds() {
-    var extra = _active ? (Date.now() - _lastActive) : 0;
-    return Math.round((_activeMs + extra) / 1000);
+  function activeSecondsDelta() {
+    var total = _activeMs + (_active ? (Date.now() - _lastActive) : 0);
+    var deltaMs = total - _lastSentMs;
+    // Safety clamp (e.g. max 10 mins delta in case of weird hibernation)
+    if (deltaMs < 0 || deltaMs > 600000) deltaMs = 0;
+    _lastSentMs = total; // mark this delta as "accounted for"
+    return Math.round(deltaMs / 1000);
   }
 
   function sendPing(keepalive, final) {
+    var deltaS = activeSecondsDelta();
+    // Do not send empty heartbeats unless it's a final ping or state change
+    if (deltaS === 0 && !final && !_lastVisEvt && _gestures === 0) return;
+
     var body = {
-      active_s:  activeSeconds(),
+      active_s:  deltaS, // send incremental delta, not total
       visible:   !document.hidden,
       path:      location.pathname,
       gestures: _gestures,   // real-user gesture count (pointer/scroll/keys), capped
     };
     if (_lastVisEvt) { body.visibility_event = _lastVisEvt; _lastVisEvt = null; }
     if (final) body.final = true;
+
+    // Reset gestures after sending so we don't keep sending them forever on idle
+    _gestures = 0;
+
     fetch('/api/ping', {
       method:    'POST',
       headers:   { 'Content-Type': 'application/json' },
@@ -129,7 +143,7 @@
   });
 
   /* Periodic heartbeat — keeps session alive + reports activity evidence */
-  setInterval(function () { sendPing(false); }, 15000);
+  setInterval(function () { sendPing(false); }, 30000);
 
   /* ═══════════════ NAV ═══════════════ */
   var burger   = document.getElementById('burger');
