@@ -1,29 +1,50 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin login</title>
+<title>ALUCARD — دخول</title>
 <meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0a0809">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Cinzel:wght@900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0e1116;--card:#161b23;--text:#e8ecf1;--mut:#8b94a3;--acc:#6ea8fe;--line:#232a35}
-*{box-sizing:border-box;margin:0}
-body{background:var(--bg);color:var(--text);font:16px/1.5 system-ui,sans-serif;min-height:100dvh;
-  display:grid;place-items:center;padding:20px}
-form{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
-h1{font-size:1.2rem}
-input{background:#0d1218;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:12px;font-size:1rem}
-button{background:var(--acc);color:#0b1220;border:0;border-radius:10px;padding:12px;font-weight:700;font-size:1rem;cursor:pointer}
-button:hover{filter:brightness(1.1)}
-.err{color:#ff8080;font-size:.9rem;display:none}
+:root{--ink:#0a0809;--panel:#141014;--line:#241c20;--line2:#33262c;--text:#e9e2d8;--mut:#9c9186;
+--gold:#c9a24b;--gold-hi:#e8c877;--gold-lo:#8a6d2c;--blood:#8e1c22;--blood-hi:#c22f37}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font:400 16px/1.7 "Cairo",system-ui,sans-serif;
+min-height:100svh;display:grid;place-items:center;padding:20px;position:relative;overflow:hidden}
+body::before{content:"";position:absolute;inset:-30%;
+background:
+ radial-gradient(40% 44% at 20% 15%, rgba(142,28,34,.18), transparent 60%),
+ radial-gradient(36% 40% at 82% 80%, rgba(201,162,75,.08), transparent 60%);
+animation:drift 50s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate3d(3%,2%,0) scale(1.05)}}
+.fm{font-family:Cinzel,serif;letter-spacing:.3em;direction:ltr;text-align:center;color:var(--gold);
+font-weight:900;font-size:1.5rem;margin-bottom:4px}
+.sub{color:var(--mut);text-align:center;font-size:.85rem;margin-bottom:22px}
+form{position:relative;background:linear-gradient(150deg,#191319,#100c0e);border:1px solid var(--line);
+border-radius:12px;padding:28px 26px;width:100%;max-width:380px;display:flex;flex-direction:column;gap:12px}
+form::before{content:"";position:absolute;top:-1px;right:18px;left:18px;height:2px;
+background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi),var(--gold-lo))}
+label{color:var(--mut);font-size:.85rem}
+input{background:#0d0a0c;border:1px solid var(--line2);color:var(--text);border-radius:9px;
+padding:13px;font:400 1rem Cairo;outline:none;transition:border-color .2s}
+input:focus{border-color:var(--gold-lo)}
+button{background:linear-gradient(120deg,var(--blood),var(--blood-lo));color:#fff;border:0;
+border-radius:9px;padding:13px;font:700 1rem Cairo;cursor:pointer;transition:filter .2s}
+button:hover{filter:brightness(1.18)}
+.err{color:#e0929a;font-size:.85rem;display:none}
+.err.show{display:block}
 </style>
 </head>
 <body>
 <form id="f" autocomplete="off">
-  <h1>🔒 Dashboard login</h1>
-  <input id="t" type="password" placeholder="Admin token" autofocus>
-  <div class="err" id="e">Wrong token.</div>
-  <button>Enter</button>
+  <div class="fm">ALUCARD</div>
+  <div class="sub">لوحة خاصة. مكانها مكانها.</div>
+  <label for="t">التوكن</label>
+  <input id="t" type="password" placeholder="••••••••••" autofocus>
+  <div class="err" id="e">التوكن غلط.</div>
+  <button>ادخل</button>
 </form>
 <script>
 document.getElementById('f').addEventListener('submit', async function (ev) {
@@ -32,7 +53,7 @@ document.getElementById('f').addEventListener('submit', async function (ev) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token: document.getElementById('t').value }) });
   if (r.ok) location.href = '/admin';
-  else document.getElementById('e').style.display = 'block';
+  else document.getElementById('e').classList.add('show');
 });
 </script>
 </body>

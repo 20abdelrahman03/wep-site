@@ -200,19 +200,6 @@ export default {
         return textResponse('User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n');
       }
 
-      /* ---------- public APIs ---------- */
-      if (p === '/api/site' && request.method === 'GET') {
-        return jsonResponse({
-          name: 'Alex',
-          tagline: 'Building thoughtful things for the web.',
-          links: [
-            { label: 'Instagram', href: 'https://instagram.com/yourhandle', icon: 'ig' },
-            { label: 'GitHub', href: 'https://github.com/yourhandle', icon: 'gh' },
-            { label: 'Email', href: 'mailto:you@example.com', icon: 'mail' },
-          ],
-        });
-      }
-
       if (p === '/api/beacon' && request.method === 'POST') {
         const vid = getCookie(request, AVID);
         if (!vid || !/^[a-f0-9]{32}$/.test(vid)) return jsonResponse({ ok: false }, 404);
@@ -221,6 +208,10 @@ export default {
         let body = {};
         try { body = await request.json(); } catch { body = {}; }
         const pl = body || {};
+        // Visitor must exist (registered on first page view) before events can be logged.
+        // A well-formed but fabricated cookie id would otherwise trip the FK constraint.
+        const known = await db.prepare(`SELECT 1 FROM visitors WHERE id = ?`).bind(vid).first();
+        if (!known) return jsonResponse({ ok: false }, 404);
         const envJson = JSON.stringify(pl.env || {});
         await db.prepare(`
           INSERT INTO events (visitor_id, session_id, ts, type, path, referrer, referrer_source,
@@ -245,6 +236,8 @@ export default {
         if (!vid || !/^[a-f0-9]{32}$/.test(vid)) return jsonResponse({ ok: false }, 404);
         let pl = {};
         try { pl = await request.json(); } catch { pl = {}; }
+        const known = await db.prepare(`SELECT 1 FROM visitors WHERE id = ?`).bind(vid).first();
+        if (!known) return jsonResponse({ ok: false }, 404);
         await db.prepare(`
           INSERT INTO events (visitor_id, session_id, ts, type, path, referrer, referrer_source,
                               is_ig_inapp, identity_mode, env, query_params, extra)
@@ -290,8 +283,10 @@ export default {
           const totals = await db.prepare(`SELECT
               (SELECT COUNT(*) FROM visitors) visitors,
               (SELECT COUNT(*) FROM visitors WHERE visit_count > 1) returning_visitors,
+              (SELECT COUNT(*) FROM sessions) sessions,
               (SELECT COUNT(*) FROM events) events,
               (SELECT COUNT(*) FROM events WHERE is_ig_inapp = 1) ig_events,
+              (SELECT COUNT(*) FROM events WHERE type = 'link_click') link_clicks,
               (SELECT COUNT(*) FROM request_logs) requests`).first();
           const bySource = (await db.prepare(
             `SELECT referrer_source, COUNT(*) n FROM events GROUP BY referrer_source ORDER BY n DESC LIMIT 15`
@@ -321,6 +316,13 @@ export default {
         if (p === '/admin/api/visitors.json') {
           const rows = (await db.prepare(
             `SELECT id, first_seen, last_seen, visit_count FROM visitors ORDER BY last_seen DESC LIMIT 500`
+          ).all()).results;
+          return jsonResponse(rows);
+        }
+
+        if (p === '/admin/api/sessions.json') {
+          const rows = (await db.prepare(
+            `SELECT id, visitor_id, started_at FROM sessions ORDER BY started_at DESC LIMIT 500`
           ).all()).results;
           return jsonResponse(rows);
         }

@@ -1,46 +1,56 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Privacy — Alex's site</title>
-<meta name="theme-color" content="#0e1116">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<title>الخصوصية — ALUCARD</title>
+<meta name="theme-color" content="#0a0809">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='14' fill='%230a0809'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='%23c9a24b' font-family='Georgia'%3EA%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Cinzel:wght@900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0e1116;--card:#161b23;--text:#e8ecf1;--mut:#8b94a3;--acc:#6ea8fe;--line:#232a35}
-*{box-sizing:border-box;margin:0}
-body{background:var(--bg);color:var(--text);font:16px/1.65 system-ui,sans-serif;padding:28px 20px}
-main{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
-h1{font-size:1.4rem} h2{font-size:1.05rem;margin-top:10px}
+:root{--ink:#0a0809;--panel:#141014;--line:#241c20;--line2:#33262c;--text:#e9e2d8;--mut:#9c9186;
+--gold:#c9a24b;--gold-hi:#e8c877;--gold-lo:#8a6d2c;--blood:#8e1c22;--blood-hi:#c22f37}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font:400 16.5px/2 "Cairo",system-ui,sans-serif;padding:30px 20px 60px}
+main{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.fm{font-family:Cinzel,serif;letter-spacing:.3em;direction:ltr;color:var(--gold);font-weight:900}
+h1{font-size:1.5rem;font-weight:900}
+h2{font-size:1.05rem;color:var(--gold-hi);margin-top:14px}
 p,li{color:var(--mut)}
-a{color:var(--acc)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+ul{padding-right:22px;display:grid;gap:6px}
+.card{background:linear-gradient(150deg,#191319,#100c0e);border:1px solid var(--line);
+border-radius:12px;padding:24px;position:relative}
+.card::before{content:"";position:absolute;top:-1px;right:16px;left:16px;height:2px;
+background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi),var(--gold-lo))}
+a{color:var(--gold);text-decoration:none}
+a:hover{color:var(--gold-hi)}
 </style>
 </head>
 <body>
 <main>
-  <h1>🔒 Privacy</h1>
+  <div class="fm">ALUCARD</div>
+  <h1>الخصوصية، ببساطة كده</h1>
   <div class="card">
-    <h2>What this site collects</h2>
+    <h2>اللي بيتجمع هنا</h2>
     <ul>
-      <li>An <b>anonymous random ID</b> (cryptographically random, stored in a first-party cookie) so I can tell a <i>returning</i> browser from a new one.</li>
-      <li>Visit events: timestamp, page path, referrer when your browser sends one, device category (mobile/tablet/desktop), browser family, and whether you arrived from an in-app browser.</li>
-      <li>Coarse technical context: language list, time zone, screen-size bucket, connection type.</li>
+      <li>معرّف عشوائي مجهول (كوكي أولي) عشان أعرف الزائر الراجع من الجديد. نقطة.</li>
+      <li>أحداث الزيارة: الوقت، الصفحة، المصدر لو المتصفح بعتته، نوع الجهاز، والجاي من متصفح مدمج زي إنستجرام.</li>
+      <li>سياق فني عام: اللغة، التوقيت، حجم الشاشة تقريبًا، نوع الاتصال.</li>
     </ul>
-    <h2>What it never collects</h2>
+    <h2>اللي عمره ما بيتجمع</h2>
     <ul>
-      <li>No names, emails, phone numbers, or account identifiers of any kind.</li>
-      <li>No cross-site tracking, no third-party pixels, no ad networks.</li>
-      <li>No exact IP addresses (only a salted one-way hash for abuse analysis).</li>
-      <li>No precise device fingerprinting.</li>
+      <li>لا أسماء ولا إيميلات ولا أرقام حسابات ولا معرّفات شخصية بأي شكل.</li>
+      <li>لا تتبع خارجي، لا بيكسلات، لا شبكات إعلانات.</li>
+      <li>مش بنخزن الـ IP نفسه، بس نسخة مشفرة اتجاه واحد عشان التحليل العام.</li>
+      <li>لا بصمات أصابع دقيقة للجهاز.</li>
     </ul>
-    <h2>Important honesty note</h2>
-    <p>The anonymous ID never reveals your identity. In my dashboard, matching a returning visit is labeled
-    <b>PROBABILISTIC</b> (same browser, probably) or <b>DETERMINISTIC</b> only for my own cookie ID — which is anonymous by design.</p>
-    <h2>Your control</h2>
-    <p>Clearing cookies or browsing privately ends visit recognition. No login is required to browse this site.</p>
+    <h2>الصراحة المطلوبة</h2>
+    <p>المعرّف المجهول مش بيقول مين انت، ولا يعرف اسمك، ولا حسابك على أي حاجة.
+    الربط بين زيارة ورجعة تبويه احتمالي حسب الكوكي، ومجرد مسحه بينتهي الموضوع.</p>
+    <h2>تحكمك</h2>
+    <p>امسح الكوكيز أو افتح تصفح خاص وخلص. الموقع نفسه مش محتاج تسجيل دخول أصلًا.</p>
   </div>
-  <p><a href="/">← Back home</a></p>
+  <p><a href="/">← ارجع للموقع</a></p>
 </main>
 </body>
 </html>

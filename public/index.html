@@ -1,65 +1,618 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Alex — personal site</title>
-<meta name="description" content="Alex's personal corner of the web.">
-<meta name="theme-color" content="#0e1116">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<title>ALUCARD — ركني على النت</title>
+<meta name="description" content="ALUCARD. ألعاب وبرمجة وتجارب AI. ركن شخصي على النت مش بورتفوليو.">
+<meta name="theme-color" content="#0a0809">
+<meta property="og:title" content="ALUCARD">
+<meta property="og:description" content="ألعاب، برمجة، وتجارب AI.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='14' fill='%230a0809'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='%23c9a24b' font-family='Georgia'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0e1116;--card:#161b23;--text:#e8ecf1;--mut:#8b94a3;--acc:#6ea8fe;--acc2:#a78bfa;--line:#232a35}
-*{box-sizing:border-box;margin:0}
+/* ---------- ALUCARD identity — dark luxury, blood red, gold, carbon ---------- */
+:root{
+  --ink:#0a0809;            /* base black */
+  --ink2:#100b0d;
+  --panel:#141014;          /* carbon panel */
+  --panel2:#191319;
+  --line:#241c20;            /* hairlines */
+  --line2:#33262c;
+  --text:#e9e2d8;           /* warm off-white */
+  --mut:#9c9186;
+  --gold:#c9a24b;
+  --gold-hi:#e8c877;
+  --gold-lo:#8a6d2c;
+  --blood:#8e1c22;
+  --blood-hi:#c22f37;
+  --blood-lo:#4a0f13;
+}
+*{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:24px 20px 60px}
-main{width:100%;max-width:640px;display:flex;flex-direction:column;gap:20px}
-.avatar{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;font-size:40px;
-  background:linear-gradient(135deg,#1d2740,#2a1f4d);border:1px solid var(--line)}
-h1{font-size:1.7rem;letter-spacing:-.02em;margin-top:6px}
-.tag{color:var(--mut);font-size:1.02rem}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
-.links{display:flex;flex-direction:column;gap:10px}
-.l{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);
-  border-radius:14px;background:var(--card);text-decoration:none;color:var(--text);
-  transition:transform .12s ease,border-color .12s ease}
-.l:active{transform:scale(.98)}
-.l:hover{border-color:var(--acc)}
-.ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:18px;
-  background:#1c2330;flex:none}
-.l small{display:block;color:var(--mut)}
-.badge{display:inline-block;font-size:.75rem;color:var(--acc2);border:1px solid #3b2f63;
-  background:#1a1530;border-radius:99px;padding:2px 10px;margin-top:8px}
-footer{color:var(--mut);font-size:.85rem;text-align:center;margin-top:12px}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001s !important;animation-iteration-count:1 !important;transition-duration:.001s !important}
+}
+body{
+  background:var(--ink); color:var(--text);
+  font:400 17px/1.9 "Cairo",system-ui,sans-serif;
+  overflow-x:hidden;
+}
+::selection{background:var(--blood);color:#fff}
+
+/* ---------- living background: slow gradient drift + carbon + noise + few particles ---------- */
+.bg{position:fixed;inset:0;z-index:-3;background:var(--ink)}
+.bg::before{content:"";position:absolute;inset:-20%;
+  background:
+    radial-gradient(38% 42% at 18% 12%, rgba(142,28,34,.16), transparent 60%),
+    radial-gradient(34% 40% at 84% 78%, rgba(201,162,75,.07), transparent 60%),
+    radial-gradient(50% 60% at 50% 110%, rgba(74,15,19,.20), transparent 70%);
+  animation:bgDrift 64s ease-in-out infinite alternate;
+}
+@keyframes bgDrift{
+  0%{transform:translate3d(-2.5%,-2%,0) scale(1)}
+  50%{transform:translate3d(1.5%,2%,0) scale(1.04)}
+  100%{transform:translate3d(2.5%,1%,0) scale(1)}
+}
+/* carbon fiber weave */
+.bg::after{content:"";position:absolute;inset:0;opacity:.5;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.016) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,.35) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(45deg, rgba(0,0,0,.28) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 4px);
+  background-size:8px 8px,8px 8px,8px 8px,8px 8px;
+}
+.noise{position:fixed;inset:0;z-index:-2;opacity:.05;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+}
+/* a handful of drifting embers, very slow, low opacity */
+.ember{position:fixed;z-index:-1;width:3px;height:3px;border-radius:50%;
+  background:var(--gold-hi);opacity:0;pointer-events:none;
+  box-shadow:0 0 6px 1px rgba(232,200,119,.35); /* the ONE intentional glow on the page */
+  animation:emberFloat linear infinite;
+}
+.ember.e1{left:8%;top:78%;animation-duration:34s;animation-delay:0s}
+.ember.e2{left:76%;top:64%;animation-duration:46s;animation-delay:7s}
+.ember.e3{left:42%;top:86%;animation-duration:52s;animation-delay:15s}
+.ember.e4{left:88%;top:30%;animation-duration:40s;animation-delay:22s}
+.ember.e5{left:22%;top:38%;animation-duration:58s;animation-delay:11s}
+.ember.e6{left:60%;top:12%;animation-duration:48s;animation-delay:3s}
+@keyframes emberFloat{
+  0%{transform:translate3d(0,0,0);opacity:0}
+  12%{opacity:.5}
+  55%{opacity:.28}
+  100%{transform:translate3d(-14px,-46vh,0);opacity:0}
+}
+
+/* ---------- top nav ---------- */
+header{position:fixed;top:0;right:0;left:0;z-index:50;
+  background:linear-gradient(180deg, rgba(10,8,9,.92), rgba(10,8,9,.78));
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.nav{max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand .sig{width:30px;height:30px;flex:none;display:grid;place-items:center;
+  border:1px solid var(--gold-lo);color:var(--gold);
+  font:900 15px/1 Cinzel,serif;
+  background:linear-gradient(160deg,#1c1417,#0d0a0b);
+  clip-path:polygon(50% 0,100% 28%,100% 100%,0 100%,0 28%);
+  transform:rotate(-45deg)}
+.brand .sig span{transform:rotate(45deg)}
+.brand b{color:var(--gold);font:900 17px Cinzel,serif;letter-spacing:.14em}
+.navlinks{display:flex;gap:4px;align-items:center}
+.navlinks a{color:var(--mut);text-decoration:none;font-size:.92rem;font-weight:600;
+  padding:8px 13px;border:1px solid transparent;transition:color .18s,background .18s}
+.navlinks a:hover{color:var(--gold-hi)}
+.navlinks a.act{color:var(--text);background:rgba(201,162,75,.07);border-color:var(--line2)}
+.burger{display:none;background:none;border:1px solid var(--line2);color:var(--text);
+  width:44px;height:44px;border-radius:8px;cursor:pointer;
+  font-size:1.25rem;line-height:1}
+@media (max-width:860px){
+  .burger{display:block}
+  .navlinks{position:absolute;top:64px;right:0;left:0;flex-direction:column;align-items:stretch;
+    background:rgba(10,8,9,.97);border-bottom:1px solid var(--line);
+    padding:10px 16px 16px;gap:6px;display:none}
+  .navlinks.open{display:flex}
+  .navlinks a{padding:13px 14px;font-size:1rem}
+}
+
+/* ---------- layout ---------- */
+main{max-width:1120px;margin:0 auto;padding:0 20px}
+section{padding:84px 0 30px;position:relative}
+.h-wrap{display:flex;align-items:baseline;gap:16px;margin-bottom:10px}
+.kicker{color:var(--blood-hi);font-weight:700;font-size:.8rem;letter-spacing:.22em;text-transform:uppercase}
+h2{font-weight:900;font-size:clamp(1.5rem,3.4vw,2.1rem);color:var(--text)}
+.h-wrap::after{content:"";flex:1;height:1px;margin-bottom:8px;
+  background:linear-gradient(270deg,var(--gold-lo),var(--line) 45%,transparent)}
+.lead{color:var(--mut);max-width:760px;margin-bottom:26px}
+.lead strong{color:var(--gold-hi);font-weight:700}
+
+/* subtle metallic divider under sections */
+.sect-sep{height:1px;max-width:1120px;margin:34px auto 0;
+  background:linear-gradient(270deg,transparent,var(--line2) 20%,var(--gold-lo) 50%,var(--line2) 80%,transparent)}
+
+/* ---------- hero ---------- */
+.hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+  padding-top:64px;position:relative}
+.hero .tagline{color:var(--mut);font-size:1rem;margin-bottom:6px;letter-spacing:.06em}
+.alucard{
+  font-family:Cinzel,serif;font-weight:900;
+  font-size:clamp(3.4rem, 12.5vw, 8.2rem);
+  line-height:1.04;letter-spacing:.1em;
+  direction:ltr;text-align:center;
+  background:linear-gradient(100deg,
+    #7c5f26 0%, #b98f3e 18%, #e8c877 34%, #fff0c6 50%,
+    #e8c877 66%, #b98f3e 82%, #7c5f26 100%);
+  background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+  animation:goldSweep 11s ease-in-out infinite alternate;
+  filter:drop-shadow(0 2px 14px rgba(142,28,34,.30)); /* deep red ambient, not neon */
+  user-select:none;
+}
+@keyframes goldSweep{
+  0%{background-position:0% 0}
+  100%{background-position:100% 0}
+}
+.hero-sub{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px;direction:ltr}
+.hero-sub .blade{width:52px;height:2px;background:linear-gradient(90deg,transparent,var(--gold-lo),var(--gold),transparent)}
+.hero-sub .rot-wrap{min-width:190px;text-align:center;overflow:hidden;height:1.7em}
+.rot{display:block;font-family:Cinzel,serif;font-weight:700;letter-spacing:.3em;
+  color:var(--gold);font-size:.95rem;line-height:1.7em}
+.hero-intro{max-width:640px;margin:34px auto 0;text-align:center;color:var(--text);
+  font-size:1.06rem}
+.hero-intro .dim{color:var(--mut)}
+.scroll-cue{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
+  color:var(--mut);font-size:.78rem;letter-spacing:.2em;display:flex;flex-direction:column;align-items:center;gap:6px}
+.scroll-cue::after{content:"";width:1px;height:34px;
+  background:linear-gradient(180deg,var(--gold-lo),transparent);
+  animation:cuePulse 2.6s ease-in-out infinite}
+@keyframes cuePulse{0%,100%{opacity:.25;transform:scaleY(.7)}50%{opacity:1;transform:scaleY(1)}}
+
+/* ---------- about ---------- */
+.about-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:22px;align-items:start}
+@media (max-width:820px){.about-grid{grid-template-columns:1fr}}
+.pane{background:linear-gradient(150deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);border-radius:10px 10px 0 0;padding:26px 26px 24px;position:relative}
+.pane::before{content:"";position:absolute;top:-1px;right:14px;left:14px;height:2px;
+  background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi),var(--gold-lo));opacity:.75}
+.pane h3{color:var(--gold-hi);font-weight:900;margin-bottom:12px;font-size:1.05rem}
+.pane p+p{margin-top:12px}
+.facts{display:grid;gap:10px}
+.fact{display:flex;align-items:center;gap:12px;padding:11px 14px;
+  background:var(--ink2);border:1px solid var(--line);border-radius:8px}
+.fact i{width:34px;height:34px;flex:none;display:grid;place-items:center;
+  color:var(--gold);border:1px solid var(--line2);border-radius:7px;font-style:normal;font-size:1rem}
+.fact div b{display:block;font-size:.95rem}
+.fact div small{color:var(--mut);font-size:.8rem}
+
+/* ---------- gaming ---------- */
+.g-note{background:linear-gradient(120deg, rgba(142,28,34,.10), transparent 55%);
+  border-right:3px solid var(--blood);padding:16px 18px;border-radius:6px;
+  color:var(--text);max-width:860px;margin-bottom:30px}
+.g-note b{color:var(--gold-hi)}
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:16px}
+@media (min-width:640px){.games{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px}}
+@media (min-width:1024px){.games{grid-template-columns:repeat(6,1fr)}}
+.gcard{position:relative;border:1px solid var(--line);border-radius:9px;overflow:hidden;
+  background:var(--panel);cursor:pointer;
+  transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+  aspect-ratio:3/4.35;outline:none}
+.gcard:hover,.gcard:focus-visible{transform:translateY(-5px);border-color:var(--gold-lo);
+  box-shadow:0 14px 30px -12px rgba(0,0,0,.75)}
+.gcard img{width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .5s ease, filter .3s ease}
+.gcard:hover img{transform:scale(1.055)}
+.gcard .shade{position:absolute;inset:0;
+  background:linear-gradient(180deg, rgba(10,8,9,0) 40%, rgba(10,8,9,.55) 68%, rgba(10,8,9,.92) 100%)}
+.gcard .cap{position:absolute;right:0;left:0;bottom:0;padding:10px 12px 12px}
+.gcard .cap b{display:block;font-size:.92rem;line-height:1.35;color:var(--text)}
+.gcard .cap small{color:var(--gold);font-size:.68rem;letter-spacing:.12em;font-weight:700}
+.gcard .mark{position:absolute;top:9px;left:9px;width:26px;height:26px;
+  display:grid;place-items:center;font-size:.72rem;font-weight:700;color:#fff;
+  background:var(--blood);border-radius:4px 4px 4px 0;
+  clip-path:polygon(0 0,100% 0,100% 78%,78% 100%,0 100%)}
+.gcard .mark.souls{background:linear-gradient(140deg,var(--blood-hi),var(--blood-lo))}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;
+  padding:18px}
+.modal.open{display:flex}
+.modal .veil{position:absolute;inset:0;background:rgba(6,4,5,.82);backdrop-filter:blur(4px)}
+.modal .box{position:relative;width:min(660px,100%);max-height:88svh;overflow:auto;
+  background:linear-gradient(160deg,#181218,#100c0e);
+  border:1px solid var(--line2);border-radius:12px;
+  display:grid;grid-template-columns:200px 1fr;gap:0;
+  box-shadow:0 30px 70px -20px rgba(0,0,0,.9)}
+@media (max-width:560px){.modal .box{grid-template-columns:1fr}}
+.modal .box img{width:100%;height:100%;min-height:220px;object-fit:cover;display:block}
+@media (max-width:560px){.modal .box img{height:190px}}
+.modal .meta{padding:22px 22px 20px;display:flex;flex-direction:column;gap:12px}
+.modal .meta h3{font-family:Cinzel,serif;direction:ltr;text-align:right;color:var(--gold-hi);
+  font-size:1.3rem;font-weight:900;letter-spacing:.04em}
+.modal .meta .genre{color:var(--mut);font-size:.9rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line2);background:var(--ink2);color:var(--text);
+  border-radius:6px;padding:5px 11px;font-size:.78rem;font-weight:600}
+.chip.hot{border-color:var(--gold-lo);color:var(--gold-hi);background:rgba(201,162,75,.06)}
+.chip.blood{border-color:#57161b;color:#e0929a;background:rgba(142,28,34,.10)}
+.modal .meta .noline{color:var(--mut);font-size:.85rem;font-style:normal}
+.mclose{position:absolute;top:10px;left:10px;z-index:2;width:38px;height:38px;
+  background:rgba(10,8,9,.85);border:1px solid var(--line2);color:var(--text);
+  border-radius:8px;cursor:pointer;font-size:1.05rem;line-height:1}
+.mclose:hover{color:var(--gold-hi);border-color:var(--gold-lo)}
+
+/* ---------- projects ---------- */
+.projects{display:grid;gap:20px}
+.proj{position:relative;display:grid;grid-template-columns:1fr 170px;gap:20px;
+  background:linear-gradient(140deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);border-radius:10px;padding:24px 26px;
+  transition:transform .2s ease,border-color .2s ease}
+.proj:hover{transform:translateX(-4px);border-color:var(--line2)}
+@media (max-width:640px){.proj{grid-template-columns:1fr}}
+.proj h3{font-weight:900;font-size:1.15rem;margin-bottom:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.proj p{color:var(--mut);max-width:640px}
+.proj .why{color:var(--text)}
+.status{font-size:.72rem;font-weight:700;letter-spacing:.14em;
+  border:1px solid var(--line2);border-radius:99px;padding:4px 12px;color:var(--mut);white-space:nowrap}
+.status.paused{color:#c8b98a;border-color:#3d3428;background:rgba(201,162,75,.05)}
+.status.active{color:#e0929a;border-color:#57161b;background:rgba(142,28,34,.12)}
+.proj .glyph{align-self:center;justify-self:center;width:100%;aspect-ratio:1;max-width:150px;
+  display:grid;place-items:center;font-size:2.4rem;color:var(--gold);
+  border:1px solid var(--line);border-radius:10px;position:relative;overflow:hidden;
+  background:linear-gradient(150deg,#1d1620,#0d0a0c)}
+.proj .glyph::after{content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg, rgba(255,255,255,.02) 0 2px, transparent 2px 4px)}
+.proj.featured{border-color:var(--gold-lo);
+  background:linear-gradient(140deg,#1b1410,#120d0f)}
+.proj.featured::before{content:"";position:absolute;top:-1px;right:20px;left:20px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold-hi),transparent)}
+.proj.featured .glyph{border-color:var(--gold-lo);
+  box-shadow:inset 0 0 24px rgba(201,162,75,.12)}
+.pulse{display:inline-flex;align-items:center;gap:7px}
+.pulse::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--blood-hi);
+  box-shadow:0 0 8px 1px rgba(194,47,55,.5); /* intentional: single live-dot glow */
+  animation:beat 2.2s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(.8);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+
+/* ---------- lab (AI experiments) ---------- */
+.lab{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.xp{background:linear-gradient(150deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);border-radius:9px;padding:18px 18px 16px;position:relative}
+.xp::before{content:"";position:absolute;top:0;right:0;width:44px;height:3px;border-radius:0 8px 0 0}
+.xp.st-active::before{background:linear-gradient(90deg,var(--blood-hi),var(--blood-lo))}
+.xp.st-paused::before{background:linear-gradient(90deg,var(--gold),var(--gold-lo))}
+.xp.st-testing::before{background:linear-gradient(90deg,#6b7f8e,#2b353c)}
+.xp .row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.xp .row b{font-size:.98rem}
+.xp .st{font-size:.66rem;font-weight:700;letter-spacing:.16em;color:var(--mut);
+  border:1px solid var(--line2);padding:3px 9px;border-radius:99px}
+.xp.st-active .st{color:#e0929a;border-color:#57161b}
+.xp p{color:var(--mut);font-size:.9rem}
+.xp .tags{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
+.xp .tags span{font-size:.7rem;color:var(--gold);border:1px solid #3d3428;border-radius:5px;padding:2px 8px}
+.xp.big{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;align-items:center;gap:18px;
+  border-color:var(--gold-lo)}
+.xp.big .glyph{width:86px;height:86px;border:1px solid var(--gold-lo);border-radius:10px;
+  display:grid;place-items:center;font-size:2rem;color:var(--gold-hi);
+  background:linear-gradient(150deg,#1d1620,#0d0a0c)}
+
+/* ---------- vibe coding ---------- */
+.vibe{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;
+  background:linear-gradient(120deg,#151016,#0d0a0b 60%);padding:34px 30px}
+.vibe::after{content:"VIBE";position:absolute;left:-8px;bottom:-30px;
+  font:900 7.5rem/1 Cinzel,serif;letter-spacing:.05em;direction:ltr;
+  color:transparent;-webkit-text-stroke:1px rgba(201,162,75,.10);pointer-events:none}
+.vibe h2{margin-bottom:14px}
+.vibe p{max-width:720px;color:var(--text)}
+.vibe p+p{margin-top:12px;color:var(--mut)}
+.vibe .quoteline{margin-top:18px;display:flex;align-items:center;gap:12px;color:var(--gold-hi);
+  font-weight:700;font-size:1.02rem}
+.vibe .quoteline::before{content:"";width:34px;height:2px;flex:none;
+  background:linear-gradient(90deg,var(--blood-hi),var(--gold))}
+
+/* ---------- contact ---------- */
+.contact{text-align:center;padding-bottom:70px}
+.contact .links{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:22px}
+.contact .links a{display:inline-flex;align-items:center;gap:9px;
+  border:1px solid var(--line2);border-radius:9px;padding:12px 20px;
+  color:var(--text);text-decoration:none;font-weight:600;
+  background:linear-gradient(150deg,var(--panel2),var(--panel));
+  transition:border-color .2s,transform .2s}
+.contact .links a:hover{border-color:var(--gold-lo);transform:translateY(-3px)}
+.contact .links a small{color:var(--mut);font-weight:400}
+footer{border-top:1px solid var(--line);padding:26px 20px 34px;text-align:center;color:var(--mut);
+  font-size:.85rem}
+footer .fm{font-family:Cinzel,serif;color:var(--gold-lo);letter-spacing:.25em;direction:ltr;display:block;margin-bottom:6px}
 footer a{color:var(--mut)}
+
+/* scroll reveal */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.rv{opacity:1;transform:none}}
+
+/* a11y focus */
+a:focus-visible,button:focus-visible,.gcard:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
 </head>
 <body>
+<div class="bg" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+<div class="ember e1" aria-hidden="true"></div><div class="ember e2" aria-hidden="true"></div>
+<div class="ember e3" aria-hidden="true"></div><div class="ember e4" aria-hidden="true"></div>
+<div class="ember e5" aria-hidden="true"></div><div class="ember e6" aria-hidden="true"></div>
+
+<header>
+  <nav class="nav" aria-label="القائمة الرئيسية">
+    <a class="brand" href="#home" data-nav>
+      <span class="sig"><span>A</span></span><b>ALUCARD</b>
+    </a>
+    <button class="burger" id="burger" aria-label="القائمة" aria-expanded="false">≡</button>
+    <div class="navlinks" id="navlinks">
+      <a href="#home" data-nav>الرئيسية</a>
+      <a href="#about" data-nav>عني</a>
+      <a href="#gaming" data-nav>الألعاب</a>
+      <a href="#projects" data-nav>المشاريع</a>
+      <a href="#lab" data-nav>المختبر</a>
+      <a href="#vibe" data-nav>Vibe Coding</a>
+      <a href="#contact" data-nav>تواصل</a>
+    </div>
+  </nav>
+</header>
+
 <main>
-  <div class="avatar">✦</div>
-  <section>
-    <h1 id="nm">Alex</h1>
-    <p class="tag" id="tg">Building thoughtful things for the web.</p>
-    <span class="badge">No logins · No third-party trackers · First-party analytics only</span>
-  </section>
-
-  <section class="links" id="links">
-    <!-- populated by client.js from /api/site -->
-  </section>
-
-  <div class="card">
-    <strong>About</strong>
-    <p style="color:var(--mut);margin-top:6px">
-      I build software and run small web experiments. This site is my permanent home link —
-      it collects only privacy-respecting, first-party analytics (anonymous visit counts),
-      never your identity.
+  <!-- ================= HERO ================= -->
+  <section class="hero" id="home">
+    <p class="tagline" style="text-align:center">مكان واحد. ثلاث هوايات. صفر احترافية مزيفة.</p>
+    <div class="alucard" aria-label="ALUCARD">ALUCARD</div>
+    <div class="hero-sub" aria-hidden="true">
+      <span class="blade"></span>
+      <span class="rot-wrap"><span class="rot" id="rot">GAMER</span></span>
+      <span class="blade"></span>
+    </div>
+    <p class="hero-intro">
+      أهلا بيك في ركني على النت. واحد مصري بيلعب، بيلمّن في الكود، وبيجرب في ال AI.
+      المكان ده جمعت فيه اللي بحبه <span class="dim">واللي بكسره وأصلحه، واللي سايبه نص مكتوب ومشيت.</span>
     </p>
-  </div>
+    <div class="scroll-cue" aria-hidden="true">SCROLL</div>
+  </section>
 
-  <footer>
-    <a href="/privacy">Privacy</a> · © <span id="yr"></span> <span id="nm2">Alex</span>
-  </footer>
+  <div class="sect-sep"></div>
+
+  <!-- ================= ABOUT ================= -->
+  <section id="about">
+    <div class="h-wrap rv"><span class="kicker">عني</span><h2>الراجل اللي وراء المكان ده</h2></div>
+    <div class="about-grid">
+      <div class="pane rv">
+        <h3>الصورة الصريحة</h3>
+        <p>
+          خليني أوضّح حاجة من الأول، ده مش بورتفوليو ولا CV رقمي. ده مكان بجمع فيه حاجاتي،
+          حاجة بعملها عشان شكلها لطيف، أو عشان عايز أعرف إزاي بتشتغل، أو عشان صاحبي قال مستحيل تظبطها.
+        </p>
+        <p>
+          أنا مش بقدم نفسي ك مهندس سوفت وير. اللي بيحصل هنا أقرب ل workshop صغير:
+          بفكر في حاجة، بجربها، بتتكسر، بصلّحها، وأحيانا كتير بكتّب إني مش هكمل وأرجع ألعب سولز.
+        </p>
+        <p>
+          الرباط المشترك بين كل حاجة هتشوفها؟ إنها بدأت بفضول. إما لعبة مسكتها عشان العالم بتاعها شادني،
+          أو مشروع بدأته عشان سؤال في دماغي محتاج جواب.
+        </p>
+      </div>
+      <div class="facts rv">
+        <div class="fact"><i>◆</i><div><b>ALUCARD</b><small>الاسم اللي بتعرّف بيه على النت. الأصل من كاسلڤانيا و مش محتاج تفسير أكتر.</small></div></div>
+        <div class="fact"><i>⚔</i><div><b>Gaming</b><small>سولز فوق، ورعب تحت، وحاجة خفيفة في النص.</small></div></div>
+        <div class="fact"><i>⚙</i><div><b>Programming</b><small>مشروع يوقف، مشروع يشتغل، ومشروع يشتغل غلط بشكل ممتع.</small></div></div>
+        <div class="fact"><i>✦</i><div><b>AI</b><small>مختبر صغير لتجارب الوكلاء وال أدوات.</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sect-sep"></div>
+
+  <!-- ================= GAMING ================= -->
+  <section id="gaming">
+    <div class="h-wrap rv"><span class="kicker">الأرشيف</span><h2>الألعاب اللي دخلت حياتي فعلاً</h2></div>
+    <p class="lead rv">
+      القائمة دي مش "أحسن ألعاب السنة". دي الألعاب اللي عديت فيها وقت حقيقي،
+      بعضها كمّلته أكتر من مرة وبعضها لسه مقعدتش منه.
+      <strong>دوس على أي غلاف</strong> هتلاقي اللي عندي أقوله عنه، لو عندي حاجة أقولها أصلًا.
+    </p>
+    <div class="g-note rv">
+      الأرقام اللي هتشوفها على كام لعبة بس هي اللي فعلاً مسجلها،
+      مش هخترع <b>500 ساعة</b> في لعبة ملمستهاش. ال سولز بشكل عام حالتهم واضحة:
+      كملتهم كلهم، وعدّى ضدي أكتر من 50 ساعة في كل واحدة، وكمّلت كل واحدة أكتر من مرة.
+    </div>
+    <div class="games" id="games"></div>
+  </section>
+
+  <div class="sect-sep"></div>
+
+  <!-- ================= PROJECTS ================= -->
+  <section id="projects">
+    <div class="h-wrap rv"><span class="kicker">الشغل</span><h2>المشاريع</h2></div>
+    <p class="lead rv">تلات مشاريع، كل واحد له حالته، ومش هزوّق الكلام أكتر من اللي حصل.</p>
+    <div class="projects">
+      <article class="proj featured rv">
+        <div>
+          <h3>AI Agent <span class="status active"><span class="pulse"></span>ACTIVE</span></h3>
+          <p class="why">ده المشروع اللي شغال عليه دلوقتي فعلاً.</p>
+          <p>
+            وكيل AI بيشتغل ب شكل محترم لحد دلوقتي، بس لسه بيتطور كل يوم.
+            الهدف بتاعي مش أعمل "منتج"، الهدف أفهم الآلة دي وصلت فين و أنا ممكن أوصل بيها فين.
+            فيه حاجات شغالة زي ما تخيلتها وحاجات بتعلمني الصبر.
+          </p>
+        </div>
+        <div class="glyph" aria-hidden="true">✦</div>
+      </article>
+
+      <article class="proj rv">
+        <div>
+          <h3>منصة ترجمة الألعاب <span class="status paused">PAUSED</span></h3>
+          <p class="why">بدأت بفكرة بسيطة: منصة تساعد في ترجمة الألعاب للعربي بمساعدة ال AI.</p>
+          <p>
+            اشتغلت عليه فترة، و المشروع كبر بسرعة أكبر من اللي أنا متخيله،
+            ووقف في الآخر عند مسألة عملية: مكنتش لاقي API مجاني مناسب لل Gemini يغطي اللي محتاجه.
+            فوقفته لحد ما الظروف تسمح. مش كل حاجة بتبدأ لازم تخلص.
+          </p>
+        </div>
+        <div class="glyph" aria-hidden="true">غ</div>
+      </article>
+
+      <article class="proj rv">
+        <div>
+          <h3>Bug Hunting <span class="status paused">PAUSED / EXPERIMENTAL</span></h3>
+          <p class="why">بدأت أتعلم ال bug hunting بجد و فعلاً لقيت مشاكل حقيقية.</p>
+          <p>
+            بس خليني صريح، التجربة مع HackerOne كانت متعبة بشكل واضح، والمشروع فضى معاه.
+            مش هتكلم هنا عن تفاصيل خصوصية ولا أهداف، ده مش مكانه.
+            اتعلمت منه حاجة مهمة: إن الواحد ممكن يعمل الشغل صح وبرضه يستنى طويل.
+          </p>
+        </div>
+        <div class="glyph" aria-hidden="true">⚑</div>
+      </article>
+    </div>
+  </section>
+
+  <div class="sect-sep"></div>
+
+  <!-- ================= AI LAB ================= -->
+  <section id="lab">
+    <div class="h-wrap rv"><span class="kicker">المختبر</span><h2>AI و التجارب</h2></div>
+    <p class="lead rv">
+      هنا بجرب حاجات ال AI ممكن تعملها قبل ما أقول على أي حاجة إنها "فكرة".
+      مش هستورد تجارب معملتهاش عشان الشكل يمتلئ، اللي موجود هنا هو اللي حصل فعلًا.
+    </p>
+    <div class="lab">
+      <div class="xp big st-active rv">
+        <div>
+          <div class="row"><b>AI Agent</b><span class="st">ACTIVE</span></div>
+          <p>المشروع الرئيسي. وكيل AI تحت التطوير المستمر، بيجيب نتايج كويسة بالفعل،
+          ولسه بكتّبله و أعدّل فيه. أي حاجة جديدة بتتعلمها منه بتروح مباشرة هنا.</p>
+          <div class="tags"><span>agents</span><span>prompting</span><span>tooling</span></div>
+        </div>
+        <div class="glyph" aria-hidden="true">✦</div>
+      </div>
+      <div class="xp st-paused rv">
+        <div class="row"><b>منصة الترجمة</b><span class="st">PAUSED</span></div>
+        <p>تجربة استخدام ال AI في ترجمة ألعاب بشكل موسّع. متوقفة لحد ما توفر حل مناسب لل API.</p>
+        <div class="tags"><span>gemini</span><span>localization</span></div>
+      </div>
+      <div class="xp st-testing rv">
+        <div class="row"><b>Bug Hunting</b><span class="st">TESTING</span></div>
+        <p>مجال تعلمته لحد ما لقيت ثغرات حقيقية. متوقف مؤقتًا، بس اللي اتعلمته مش رايح.</p>
+        <div class="tags"><span>security</span><span>web</span></div>
+      </div>
+      <div class="xp st-active rv">
+        <div class="row"><b>الموقع ده نفسه</b><span class="st">ACTIVE</span></div>
+        <p>الموقع اللي انت واقف فيه دلوقتي تُجربة بحد ذاته: تحليلات طرف أول محترمة للخصوصية،
+        وتجربة قائمة على بيانات حقيقية عن إنستجرام وال webviews. ال dashboard بتاعه كويس فعلًا.</p>
+        <div class="tags"><span>workers</span><span>D1</span><span>analytics</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sect-sep"></div>
+
+  <!-- ================= VIBE CODING ================= -->
+  <section id="vibe">
+    <div class="vibe rv">
+      <span class="kicker">الأسلوب</span>
+      <h2>Vibe Coding</h2>
+      <p>
+        مش هقعد أقولك إني كتبت كل سطر من الصفر وأنا عارف إني مش كتبته.
+        معظم اللي هتشوفه هنا اتعمل بال vibe coding: فكرة في دماغي، مناقشة طويلة مع ال AI،
+        كود، debug، مناقشة تانية، حاجة تتكسر من مكان تاني، أصلّحها، و نكمل.
+      </p>
+      <p>
+        ده مش عيب ولا حاجة أستحي منها. ده أسلوب شغال بيوصل لنفس النتيجة بطريق أسرع،
+        بس بشرط إنك تفهم اللي بيحصل تحت إيدك، و أنا بفهمه.
+      </p>
+      <div class="quoteline">الفكرة بتاعتي، ال AI زيدي، و ال debug علينا الاتنين.</div>
+    </div>
+  </section>
+
+  <div class="sect-sep"></div>
+
+  <!-- ================= CONTACT ================= -->
+  <section id="contact" class="contact">
+    <div class="rv">
+      <span class="kicker">تواصل</span>
+      <h2>لو عايز تكلم</h2>
+      <p class="lead" style="margin-inline:auto;text-align:center">
+        أنا موجود على نفس الأماكن المعتادة. لو حابة في حاجة شفتها هنا أو عايز تتناقش في لعبة أو فكرة، ابعت.
+      </p>
+      <div class="links">
+        <a href="https://instagram.com" target="_blank" rel="noopener" data-ext>Instagram <small>دي إللي جيت منه أصلًا</small></a>
+        <a href="https://github.com" target="_blank" rel="noopener" data-ext>GitHub <small>الكود لما ينفع حد</small></a>
+      </div>
+    </div>
+  </section>
 </main>
+
+<footer>
+  <span class="fm">ALUCARD</span>
+  المكان ده اتعمل بلا تتبع خارجي ولا اكاونتات ولا وجع دماغ. <a href="/privacy">الخصوصية ببساطة</a>.
+</footer>
+
+<!-- game modal -->
+<div class="modal" id="gmodal" role="dialog" aria-modal="true" aria-labelledby="gm-title">
+  <div class="veil" data-close></div>
+  <div class="box">
+    <button class="mclose" data-close aria-label="اقفل">✕</button>
+    <img id="gm-img" src="" alt="">
+    <div class="meta">
+      <h3 id="gm-title"></h3>
+      <div class="genre" id="gm-genre"></div>
+      <div class="chips" id="gm-chips"></div>
+      <div class="noline" id="gm-note"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* game data — only REAL stats provided by owner. No invented numbers. */
+window.GAMES = [
+  {id:"elden-ring", name:"Elden Ring", img:"/covers/elden-ring.jpg", genre:"RPG عالم مفتوح / سولزلايك — FromSoftware 2022",
+   chips:[["خلصتها 10 مرات","blood"],["500+ ساعة","hot"]], note:"اللعبة اللي خدت من عمري أكتر من أي لعبة تانية. كل مرة بشوف فيها حاجة جديدة."},
+  {id:"nightreign", name:"Elden Ring Nightreign", img:"/covers/nightreign.jpg", genre:"Co-op roguelike في عالم Elden Ring — 2025",
+   chips:[["خلصتها","blood"],["300+ ساعة","hot"]], note:"ال سولز ب روح جماعية. الجروب اللي بيلعب معايا عارف نفسه."},
+  {id:"dark-souls", name:"Dark Souls", img:"/covers/dark-souls.jpg", genre:"سولزلايك — FromSoftware 2011",
+   chips:[["كمّلتها أكتر من مرة","blood"],["50+ ساعة","hot"]], note:"اللي فتح الباب لكل ده. أناباسا ما بنسيها."},
+  {id:"dark-souls-2", name:"Dark Souls II", img:"/covers/dark-souls-2.jpg", genre:"سولزلايك — FromSoftware 2014",
+   chips:[["كمّلتها أكتر من مرة","blood"],["50+ ساعة","hot"]], note:"الأكثر جدلاً في السلسلة، و برضه عندي فيها ساعات محترمة."},
+  {id:"dark-souls-3", name:"Dark Souls III", img:"/covers/dark-souls-3.jpg", genre:"سولزلايك — FromSoftware 2016",
+   chips:[["كمّلتها أكتر من مرة","blood"],["50+ ساعة","hot"]], note:"نهاية السلسلة بأسلوب قتال أسرع. ال بوسز بتوعها من أحسن ما عملوا."},
+  {id:"sekiro", name:"Sekiro: Shadows Die Twice", img:"/covers/sekiro.jpg", genre:"أكشن مغامرة قتال سيوف — FromSoftware 2019",
+   chips:[["كمّلتها أكتر من مرة","blood"],["50+ ساعة","hot"]], note:"اللي غيّر فهمي لل timing خالص. ال deflection ليه إيقاع محترم."},
+  {id:"lies-of-p", name:"Lies of P", img:"/covers/lies-of-p.jpg", genre:"سولزلايك — Neowiz 2023",
+   chips:[["كمّلتها أكتر من مرة","blood"],["50+ ساعة","hot"]], note:"أحسن واحد «غير سولز» عمل سولز. كنا بنكتب التاريخ ومكناش عارفين."},
+  {id:"outlast", name:"Outlast", img:"/covers/outlast.jpg", genre:"Survival Horror — Red Barrels 2013",
+   chips:[], note:"مش محتاج سلاح ولا شجاعة، محتاج بطارية كاميرا ونفس طويل."},
+  {id:"skyrim", name:"Skyrim", img:"/covers/skyrim.jpg", genre:"RPG عالم مفتوح — Bethesda 2011",
+   chips:[], note:"اللعبة اللي بترجع لها كل شوية لمجرد تشوف الجبل، وبعدها تلاقي نفسك في كهف بعد 4 ساعات."},
+  {id:"denshattack", name:"Denshattack!", img:"/covers/denshattack.jpg", genre:"Arcade متوتر — 2026",
+   chips:[], note:"حاجة سريعة بتفضّل أعصابك، بالأسلوب الياباني المعتاد في الاستهتار بحياة اللاعب."},
+  {id:"hollow-knight", name:"Hollow Knight", img:"/covers/hollow-knight.jpg", genre:"Metroidvania — Team Cherry 2017",
+   chips:[], note:"دليل إن اللعبة الهندية ممكن تخبط أي AAA في التصميم."},
+  {id:"it-takes-two", name:"It Takes Two", img:"/covers/it-takes-two.jpg", genre:"Co-op Adventure — Hazelight 2021",
+   chips:[], note:"الوحيدة في القائمة اللي بتلعبها ومش مكتوب عليها أهلا بيك في لاند أوف ذا ديد."},
+  {id:"reanimal", name:"Reanimal", img:"/covers/reanimal.jpg", genre:"Horror Co-op — Tarsier/2025",
+   chips:[], note:"من نفس مدرسة ليتل نايتمارز، الرعب بقى ليه رفيق في الجريمة."},
+  {id:"little-nightmares-3", name:"Little Nightmares III", img:"/covers/little-nightmares-3.jpg", genre:"Horror Puzzle Platformer — 2025",
+   chips:[], note:"السلسلة اللي عرّفتني إن الرعب مش محتاج دم عشان يوجع."},
+  {id:"detroit", name:"Detroit: Become Human", img:"/covers/detroit.jpg", genre:"Interactive Drama — Quantic Dream 2018",
+   chips:[], note:"لعبتها و أنا بقرر كل اختيار بيها ب جدية أكتر من شغلي."},
+  {id:"dead-cells", name:"Dead Cells", img:"/covers/dead-cells.jpg", genre:"Roguelike Metroidvania — Motion Twin 2018",
+   chips:[], note:"واحد رن من سولز جوّه روجلايك و طلع بحاجة تلعبها وانت مستريح."},
+];
+</script>
 <script src="/client.js" defer></script>
 </body>
 </html>

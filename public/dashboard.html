@@ -1,134 +1,207 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Analytics dashboard</title>
+<title>ALUCARD — التحليلات</title>
 <meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0a0809">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0e1116;--card:#161b23;--text:#e8ecf1;--mut:#8b94a3;--acc:#6ea8fe;--acc2:#a78bfa;--ok:#7ee2a8;--warn:#ffcc6e;--bad:#ff8080;--line:#232a35}
-*{box-sizing:border-box;margin:0}
-body{background:var(--bg);color:var(--text);font:15px/1.55 system-ui,sans-serif;padding:20px}
-main{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
-h1{font-size:1.35rem}
-h2{font-size:1rem;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
-.kpi b{font-size:1.6rem;display:block}
-.kpi span{color:var(--mut);font-size:.85rem}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;overflow:auto}
-table{border-collapse:collapse;width:100%;font-size:.82rem}
-th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap}
-th{color:var(--mut);position:sticky;top:0;background:var(--card)}
-td.wrap{white-space:normal;max-width:420px}
-.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:.72rem;border:1px solid var(--line)}
-.tag.ig{color:var(--acc2);border-color:#3b2f63;background:#1a1530}
-.tag.det{color:var(--ok)} .tag.pro{color:var(--warn)} .tag.unk{color:var(--mut)}
-.tabs{display:flex;gap:8px;flex-wrap:wrap}
-.tabs button{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:99px;padding:8px 16px;cursor:pointer;font-size:.9rem}
-.tabs button.on{border-color:var(--acc);color:var(--acc)}
-.legend{color:var(--mut);font-size:.8rem;line-height:1.6}
-code{background:#0d1218;padding:1px 5px;border-radius:5px;font-size:.78rem}
-#tbl td{max-width:320px}
-details{margin-top:8px}
+:root{
+  --ink:#0a0809;--ink2:#100b0d;--panel:#141014;--panel2:#191319;
+  --line:#241c20;--line2:#33262c;--text:#e9e2d8;--mut:#9c9186;
+  --gold:#c9a24b;--gold-hi:#e8c877;--gold-lo:#8a6d2c;
+  --blood:#8e1c22;--blood-hi:#c22f37;--blood-lo:#4a0f13;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font:400 15px/1.7 "Cairo",system-ui,sans-serif;padding:20px}
+main{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.hd .t{display:flex;align-items:baseline;gap:14px}
+.hd h1{font:900 1.3rem Cairo;color:var(--gold-hi)}
+.hd .fm{font:900 .8rem Cinzel;color:var(--gold-lo);letter-spacing:.25em;direction:ltr}
+.hd a.out{color:var(--mut);text-decoration:none;font-size:.85rem;border:1px solid var(--line2);border-radius:8px;padding:6px 12px}
+.hd a.out:hover{color:var(--gold-hi);border-color:var(--gold-lo)}
+
+/* THE counter */
+.bigcount{background:linear-gradient(140deg,#1b1410,#120d0f);border:1px solid var(--gold-lo);
+  border-radius:12px;padding:22px 26px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+  position:relative;overflow:hidden}
+.bigcount::before{content:"";position:absolute;top:-1px;right:20px;left:20px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold-hi),transparent)}
+.bigcount .lbl{flex:1;min-width:180px}
+.bigcount .lbl small{color:var(--blood-hi);font-weight:700;font-size:.72rem;letter-spacing:.2em;display:block}
+.bigcount .lbl b{display:block;font-size:1.05rem;color:var(--text)}
+.bigcount .lbl span{color:var(--mut);font-size:.8rem}
+#totalVisitors{font:900 clamp(3rem,8vw,4.6rem)/1 Cinzel,serif;color:var(--gold-hi);direction:ltr;
+  text-align:center;min-width:150px;
+  background:linear-gradient(100deg,#b98f3e,#e8c877 40%,#fff0c6 50%,#e8c877 60%,#b98f3e);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.kpi{background:linear-gradient(150deg,var(--panel2),var(--panel));border:1px solid var(--line);
+  border-radius:10px;padding:13px 15px}
+.kpi b{font-size:1.45rem;display:block;direction:ltr;text-align:right;font-family:Cinzel,serif;color:var(--text)}
+.kpi span{color:var(--mut);font-size:.78rem}
+.kpi.red b{color:#e0929a}.kpi.gold b{color:var(--gold-hi)}
+
+.card{background:linear-gradient(150deg,var(--panel2),var(--panel));border:1px solid var(--line);
+  border-radius:10px;padding:16px;overflow:auto}
+.card h2{font-size:.85rem;color:var(--mut);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+table{border-collapse:collapse;width:100%;font-size:.8rem}
+th,td{text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top}
+th{color:var(--mut);position:sticky;top:0;background:var(--panel);font-size:.72rem}
+td code{background:var(--ink2);padding:1px 5px;border-radius:4px;font-size:.72rem;direction:ltr;display:inline-block}
+td.wrap{white-space:normal;max-width:340px}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:.68rem;border:1px solid var(--line2)}
+.tag.ig{color:#e0929a;border-color:#57161b;background:rgba(142,28,34,.12)}
+.tag.det{color:#b8d4a8;border-color:#2e3d28}
+.tag.pro{color:#e8c877;border-color:#3d3428}
+.tag.unk{color:var(--mut)}
+.tag.st-active{color:#e0929a;border-color:#57161b}
+.tag.st-paused{color:#c8b98a;border-color:#3d3428}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{background:var(--ink2);color:var(--mut);border:1px solid var(--line2);border-radius:99px;
+  padding:7px 15px;cursor:pointer;font:600 .82rem Cairo}
+.tabs button.on{border-color:var(--gold-lo);color:var(--gold-hi);background:rgba(201,162,75,.07)}
+.scroll{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.legend{color:var(--mut);font-size:.78rem;line-height:1.8;border:1px dashed var(--line2);border-radius:8px;padding:10px 14px}
+.legend b{color:var(--text)}
+a{color:var(--gold)}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 </style>
 </head>
 <body>
 <main>
-  <h1>📊 Private analytics</h1>
-  <div class="grid" id="kpis"></div>
+  <div class="hd">
+    <div class="t"><h1>لوحة ALUCARD</h1><span class="fm">PRIVATE DASHBOARD</span></div>
+    <a class="out" href="/">← الموقع</a>
+  </div>
 
-  <div class="card"><h2>Traffic sources</h2><div id="src"></div></div>
+  <div class="bigcount">
+    <div class="lbl">
+      <small>TOTAL VISITORS</small>
+      <b>إجمالي الزوار</b>
+      <span>عدد الزوار الفريدين من جدول visitors — مش الأحداث</span>
+    </div>
+    <div id="totalVisitors">—</div>
+    <div id="returnBox" style="min-width:130px">
+      <small style="color:var(--mut);font-size:.78rem;display:block">زوار راجعين</small>
+      <b id="returningVisitors" style="font:900 1.9rem Cinzel;color:var(--text);direction:ltr">—</b>
+      <span id="retPct" style="color:var(--mut);font-size:.75rem"></span>
+    </div>
+  </div>
+
+  <div class="mini" id="kpis"></div>
+
+  <div class="grid2">
+    <div class="card"><h2>مصادر الزيارات</h2><div id="src"></div></div>
+    <div class="card"><h2>الزيارات من إنستجرام</h2><div id="ig"></div></div>
+  </div>
 
   <div class="card">
     <div class="tabs" id="tabs">
-      <button data-v="events" class="on">Events</button>
-      <button data-v="requests">Raw request inspector</button>
-      <button data-v="visitors">Visitors</button>
+      <button data-v="events" class="on">آخر الأحداث</button>
+      <button data-v="visitors">آخر الزوار</button>
+      <button data-v="sessions">آخر الجلسات</button>
+      <button data-v="requests">فاحص الطلبات الخام</button>
     </div>
-    <div style="max-height:520px;overflow:auto;margin-top:12px">
-      <table id="tbl"><thead id="th"></thead><tbody id="tb"></tbody></table>
-    </div>
+    <div class="scroll"><table id="tbl"><thead id="th"></thead><tbody id="tb"></tbody></table></div>
   </div>
 
-  <div class="card legend">
-    <strong>Identity model (important):</strong><br>
-    <span class="tag det">DETERMINISTIC</span> known directly from a reliable identifier — our own first-party cookie ID (an <em>anonymous</em> random ID, never a real identity).<br>
-    <span class="tag pro">PROBABILISTIC</span> likely the same browser/device based on coarse technical signals — <b>never</b> a confirmed identity.<br>
-    <span class="tag unk">UNKNOWN</span> no reliable connection exists.<br><br>
-    Anonymous IDs <b>do not</b> reveal any person's real identity, Instagram username, or account.
-    Rows marked <span class="tag ig">IG in-app</span> mean the request <i>arrived from</i> the Instagram WebView environment — nothing more.
+  <div class="legend">
+    <b>نموذج الهوية:</b>
+    <span class="tag det">DETERMINISTIC</span> معروف من معرّف موثوق (كوكي الموقع المجهول نفسه).
+    <span class="tag pro">PROBABILISTIC</span> غالبًا نفس الزائر حسب إشارات فنية — أبدًا مش هوية مؤكدة.
+    <span class="tag unk">UNKNOWN</span> لا يوجد ربط موثوق.
+    <span class="tag ig">IG in-app</span> الطلب جاي من متصفح إنستجرام المدمج — لا أكثر.
+    المعرّف المجهول ما بيكشفش هوية حقيقية ولا حساب إنستجرام أبدًا.
   </div>
 </main>
 <script>
-(function () {
-  var q = new URLSearchParams(location.search);
-  var cur = q.get('v') || 'events';
+(function(){
+  var esc = function(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  var short = function(v,n){ v = String(v == null ? '' : v); return '<code>'+esc(v.length>n?v.slice(0,n)+'…':v)+'</code>'; };
+  var idTag = function(m){
+    if(m==='deterministic') return '<span class="tag det">DET</span>';
+    if(m==='probabilistic') return '<span class="tag pro">PRO</span>';
+    return '<span class="tag unk">UNK</span>'; };
+  var fmt = function(ts){ return esc(ts).slice(11,19); };
 
-  fetch('/admin/api/summary.json').then(r => r.json()).then(function (s) {
+  fetch('/admin/api/summary.json').then(function(r){return r.json();}).then(function(s){
+    document.getElementById('totalVisitors').textContent = s.totals.visitors;
+    document.getElementById('returningVisitors').textContent = s.totals.returning_visitors;
+    var pct = s.totals.visitors ? Math.round(100*s.totals.returning_visitors/s.totals.visitors) : 0;
+    document.getElementById('retPct').textContent = pct + '% من الزوار';
     var k = [
-      ['Visitors', s.totals.visitors], ['Returning', s.totals.returning_visitors],
-      ['Events', s.totals.events], ['IG in-app events', s.totals.ig_events],
-      ['Logged requests', s.totals.requests],
+      ['جلسات', s.totals.sessions, ''],
+      ['أحداث', s.totals.events, ''],
+      ['نقرات روابط', s.totals.link_clicks, 'gold'],
+      ['طلبات مسجلة', s.totals.requests, ''],
+      ['أحداث إنستجرام', s.totals.ig_events, 'red'],
     ];
-    document.getElementById('kpis').innerHTML = k.map(function (x) {
-      return '<div class="kpi"><b>' + x[1] + '</b><span>' + x[0] + '</span></div>';
+    document.getElementById('kpis').innerHTML = k.map(function(x){
+      return '<div class="kpi '+(x[2]||'')+'"><b>'+x[1]+'</b><span>'+x[0]+'</span></div>';
     }).join('');
-    document.getElementById('src').innerHTML = '<table><tr><th>Source</th><th>Events</th></tr>' +
-      s.bySource.map(function (r) { return '<tr><td>' + r.referrer_source + '</td><td>' + r.n + '</td></tr>'; }).join('') + '</table>';
+    document.getElementById('src').innerHTML =
+      '<table><tr><th>المصدر</th><th>أحداث</th></tr>' +
+      s.bySource.map(function(r){
+        var n = r.referrer_source==null ? 'غير مسجل' : esc(r.referrer_source);
+        return '<tr><td class="wrap">'+n+'</td><td>'+r.n+'</td></tr>';
+      }).join('') + '</table>';
+    document.getElementById('ig').innerHTML =
+      '<table><tr><th>مؤشر</th><th>القيمة</th></tr>' +
+      '<tr><td>أحداث من متصفح إنستجرام</td><td><b>'+s.totals.ig_events+'</b></td></tr>' +
+      '<tr><td class="wrap">ملاحظة</td><td class="wrap" style="color:var(--mut)">راجع تبويب الأحداث وصفوف IG</td></tr></table>';
   });
 
   var heads = {
-    events: ['Time', 'Visitor', 'Type', 'Source', 'IG in-app', 'Identity', 'Path', 'Env'],
-    requests: ['Time', 'Visitor', 'Method', 'Path', 'Query params', 'UA', 'X-Requested-With', 'Referrer'],
-    visitors: ['Anonymous ID', 'First seen', 'Last seen', 'Visits'],
+    events:['الوقت','الزائر','النوع','المصدر','IG','الهوية','المسار'],
+    visitors:['المعرّف','أول ظهور','آخر ظهور','زيارات'],
+    sessions:['الجلسة','الزائر','بدأت'],
+    requests:['الوقت','الزائر','ميثود','المسار','باراميترز','UA','XRW','Referer'],
   };
-
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function idTag(m) {
-    if (m === 'deterministic') return '<span class="tag det">DETERMINISTIC</span>';
-    if (m === 'probabilistic') return '<span class="tag pro">PROBABILISTIC</span>';
-    return '<span class="tag unk">UNKNOWN</span>';
-  }
-  function short(v, n) { v = String(v || ''); return '<code>' + esc(v.length > n ? v.slice(0, n) + '…' : v) + '</code>'; }
-
-  function render(view) {
-    cur = view;
-    document.querySelectorAll('#tabs button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === view); });
-    document.getElementById('th').innerHTML = '<tr>' + heads[view].map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>';
-    fetch('/admin/api/' + view + '.json?limit=200').then(r => r.json()).then(function (rows) {
-      document.getElementById('tb').innerHTML = rows.map(function (r) {
-        if (view === 'events') {
-          return '<tr><td>' + esc(r.ts).slice(0, 19).replace('T', ' ') + '</td>' +
-            '<td>' + short(r.visitor_id, 8) + '</td><td><b>' + esc(r.type) + '</b></td>' +
-            '<td>' + esc(r.referrer_source) + '</td>' +
-            '<td>' + (r.is_ig_inapp ? '<span class="tag ig">YES</span>' : '—') + '</td>' +
-            '<td>' + idTag(r.identity_mode) + '</td>' +
-            '<td class="wrap">' + esc(r.path) + '</td>' +
-            '<td class="wrap">' + short(r.env, 90) + '</td></tr>';
+  function render(v){
+    document.querySelectorAll('#tabs button').forEach(function(b){
+      b.classList.toggle('on', b.dataset.v===v);
+    });
+    document.getElementById('th').innerHTML = '<tr>'+heads[v].map(function(h){
+      return '<th>'+h+'</th>'; }).join('')+'</tr>';
+    fetch('/admin/api/'+v+'.json?limit=150').then(function(r){return r.json();}).then(function(rows){
+      document.getElementById('tb').innerHTML = rows.map(function(r){
+        if(v==='events'){
+          return '<tr><td>'+fmt(r.ts)+'</td><td>'+short(r.visitor_id,8)+'</td>'+
+            '<td><b>'+esc(r.type)+'</b></td><td>'+esc(r.referrer_source||'—')+'</td>'+
+            '<td>'+(r.is_ig_inapp?'<span class="tag ig">IG</span>':'—')+'</td>'+
+            '<td>'+idTag(r.identity_mode)+'</td><td class="wrap">'+esc(r.path)+'</td></tr>';
         }
-        if (view === 'requests') {
-          var h = {}; try { h = JSON.parse(r.headers_json || '{}'); } catch (e) {}
-          var qq = r.query_json && r.query_json !== '{}' ? r.query_json : '';
-          return '<tr><td>' + esc(r.ts).slice(0, 19).replace('T', ' ') + '</td>' +
-            '<td>' + short(r.visitor_id, 8) + '</td><td>' + esc(r.method) + '</td>' +
-            '<td class="wrap">' + esc(r.path) + '</td>' +
-            '<td class="wrap">' + (qq ? '<details><summary>params</summary>' + short(qq, 300) + '</details>' : '—') + '</td>' +
-            '<td class="wrap">' + short(r.ua, 60) + '</td>' +
-            '<td class="wrap">' + esc(h['x-requested-with'] || '—') + '</td>' +
-            '<td class="wrap">' + esc(r.referrer || '—') + '</td></tr>';
+        if(v==='visitors'){
+          return '<tr><td>'+short(r.id,10)+'</td><td>'+fmt(r.first_seen)+'</td>'+
+            '<td>'+fmt(r.last_seen)+'</td><td><b>'+r.visit_count+'</b></td></tr>';
         }
-        return '<tr><td>' + short(r.id, 10) + '</td><td>' + esc(r.first_seen).slice(0, 19).replace('T', ' ') +
-          '</td><td>' + esc(r.last_seen).slice(0, 19).replace('T', ' ') + '</td><td><b>' + r.visit_count + '</b></td></tr>';
+        if(v==='sessions'){
+          return '<tr><td>'+short(r.id,10)+'</td><td>'+short(r.visitor_id,8)+'</td>'+
+            '<td>'+fmt(r.started_at)+'</td></tr>';
+        }
+        var h={}; try{h=JSON.parse(r.headers_json||'{}');}catch(e){}
+        var q = r.query_json && r.query_json!=='{}' ? short(r.query_json,40) : '—';
+        return '<tr><td>'+fmt(r.ts)+'</td><td>'+short(r.visitor_id,8)+'</td><td>'+esc(r.method)+'</td>'+
+          '<td class="wrap">'+esc(r.path)+'</td><td class="wrap">'+q+'</td>'+
+          '<td class="wrap">'+short(r.ua,34)+'</td>'+
+          '<td class="wrap">'+esc(h['x-requested-with']||'—')+'</td>'+
+          '<td class="wrap">'+esc(r.referrer||'—')+'</td></tr>';
       }).join('');
     });
   }
-
-  document.querySelectorAll('#tabs button').forEach(function (b) {
-    b.addEventListener('click', function () { render(b.dataset.v); });
+  document.querySelectorAll('#tabs button').forEach(function(b){
+    b.addEventListener('click', function(){ render(b.dataset.v); });
   });
-  render(cur);
+  render('events');
 })();
 </script>
 </body>

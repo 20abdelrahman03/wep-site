@@ -1,21 +1,23 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
 
-  // Worker name
+  // Worker name — matches the deployed Cloudflare Worker & the repo
   "name": "wep-site",
 
   "main": "src/worker.js",
 
   "compatibility_date": "2026-08-01",
 
-  // Static assets served by the same Worker deployment
+  // Static assets served by the same Worker deployment.
+  // run_worker_first lets the Worker intercept '/', API and admin routes
+  // (visit tracking + auth) and delegate everything else to assets.
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
     "run_worker_first": ["/", "/api/*", "/admin*"]
   },
 
-  // Cloudflare D1 database
+  // Cloudflare D1 database — the real production database.
   "d1_databases": [
     {
       "binding": "DB",
@@ -25,7 +27,7 @@
     }
   ]
 
-  // Secrets are configured separately in Cloudflare:
-  // ADMIN_TOKEN
-  // IP_HASH_SALT
+  // Secrets are configured separately in Cloudflare (never in source):
+  //   ADMIN_TOKEN
+  //   IP_HASH_SALT
 }
