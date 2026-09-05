@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALUCARD — التحليلات</title>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#0a0809">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0809;--ink2:#100b0d;--panel:#141014;--panel2:#191319;
+  --line:#241c20;--line2:#33262c;--text:#e9e2d8;--mut:#9c9186;
+  --gold:#c9a24b;--gold-hi:#e8c877;--gold-lo:#8a6d2c;
+  --blood:#8e1c22;--blood-hi:#c22f37;--blood-lo:#4a0f13;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--text);font:400 15px/1.7 "Cairo",system-ui,sans-serif;padding:18px 14px 60px;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:-1;opacity:.35;pointer-events:none;
+  background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.016) 0 2px,transparent 2px 4px);
+  background-size:8px 8px}
+main{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+
+/* ── auth wall ── */
+#authWall{display:none;align-items:center;justify-content:center;min-height:85vh}
+#authWall.show{display:flex}
+.login-box{background:linear-gradient(150deg,var(--panel2),var(--panel));border:1px solid var(--line2);
+  border-radius:14px;padding:32px 28px;width:min(380px,100%);text-align:center;position:relative}
+.login-box::before{content:"";position:absolute;top:-1px;right:20px;left:20px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold-hi),transparent)}
+.login-box .brand{font:900 1.5rem Cinzel;color:var(--gold-hi);letter-spacing:.12em;direction:ltr;margin-bottom:6px}
+.login-box p{color:var(--mut);font-size:.85rem;margin-bottom:20px}
+.login-box input{width:100%;background:var(--ink2);border:1px solid var(--line2);border-radius:8px;
+  padding:11px 14px;color:var(--text);font:600 1rem Cairo;text-align:center;-webkit-text-security:disc}
+.login-box input:focus{outline:none;border-color:var(--gold-lo)}
+.login-box .go{width:100%;margin-top:12px;background:linear-gradient(135deg,var(--blood-lo),var(--blood));
+  border:1px solid var(--blood-hi);border-radius:8px;padding:11px;color:#fff;font:700 .95rem Cairo;cursor:pointer}
+.login-box .err{color:#e0929a;font-size:.82rem;min-height:1.4em;margin-top:8px}
+
+/* ── top bar ── */
+.hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  padding-bottom:12px;border-bottom:1px solid var(--line)}
+.hd-l{display:flex;align-items:baseline;gap:12px}
+.hd h1{font:900 1.2rem Cairo;color:var(--gold-hi)}
+.hd .fm{font:900 .7rem Cinzel;color:var(--gold-lo);letter-spacing:.25em;direction:ltr}
+.hd-r{display:flex;gap:8px;flex-wrap:wrap}
+.btn{color:var(--mut);font:600 .8rem Cairo;border:1px solid var(--line2);border-radius:8px;
+  padding:6px 13px;background:none;cursor:pointer;white-space:nowrap}
+.btn:hover{color:var(--gold-hi);border-color:var(--gold-lo)}
+.btn.gold{border-color:var(--gold-lo);color:var(--gold-hi)}
+.btn.danger:hover{color:#e0929a;border-color:#57161b}
+
+/* ── live badge ── */
+.livebadge{display:inline-flex;align-items:center;gap:7px;font:700 .78rem Cairo;color:#8ecbb8;
+  border:1px solid #1e3d36;border-radius:99px;padding:4px 12px;background:rgba(142,203,184,.05)}
+.livebadge b{font-family:Cinzel;direction:ltr}
+.livebadge::before{content:"";width:8px;height:8px;border-radius:50%;background:#2ec49b;
+  box-shadow:0 0 8px 1px rgba(46,196,155,.6);animation:beat 2s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(.75);opacity:.55}50%{transform:scale(1.1);opacity:1}}
+
+/* ── filter bar ── */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  background:linear-gradient(150deg,var(--panel2),var(--panel));border:1px solid var(--line);
+  border-radius:10px;padding:12px 14px}
+.filters label{color:var(--mut);font-size:.72rem;display:block;margin-bottom:3px}
+.filters select,.filters input{background:var(--ink2);border:1px solid var(--line2);border-radius:7px;
+  color:var(--text);font:600 .8rem Cairo;padding:6px 9px;min-width:110px}
+.filters select:focus,.filters input:focus{outline:none;border-color:var(--gold-lo)}
+.filters .fg{display:flex;flex-direction:column}
+.filters .clear{align-self:flex-end}
+
+/* ── KPI grid ── */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px}
+.kpi{background:linear-gradient(150deg,var(--panel2),var(--panel));border:1px solid var(--line);
+  border-radius:10px;padding:14px 16px;position:relative;cursor:default}
+.kpi::before{content:"";position:absolute;top:-1px;right:10px;left:10px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line2),transparent)}
+.kpi .lbl{color:var(--mut);font-size:.75rem;display:flex;align-items:center;gap:6px}
+.kpi .lbl .dot{width:9px;height:9px;border-radius:3px;flex:none}
+.kpi .val{font:900 1.9rem/1.2 Cinzel,serif;direction:ltr;text-align:right;margin-top:4px}
+.kpi .sub{color:var(--mut);font-size:.7rem;margin-top:2px}
+.kpi.gold .val{color:var(--gold-hi)}
+.kpi.human .val{color:#8ecbb8}
+.kpi.bot .val{color:#e0929a}
+.kpi.unk .val{color:var(--mut)}
+.kpi.blue .val{color:#9ab8d4}
+.kpi.warn .val{color:#c8b98a}
+
+/* ── cards ── */
+.card{background:linear-gradient(150deg,var(--panel2),var(--panel));border:1px solid var(--line);
+  border-radius:10px;padding:16px;overflow:hidden}
+.card-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.card-hd h2{font-size:.8rem;color:var(--mut);text-transform:uppercase;letter-spacing:.14em;font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* ── bars ── */
+.bars{display:flex;flex-direction:column;gap:7px}
+.bar-row{display:grid;grid-template-columns:150px 1fr 130px 36px;gap:8px;align-items:center}
+.bar-row .name{color:var(--text);font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-row .track{background:var(--ink2);border-radius:99px;height:9px;overflow:hidden}
+.bar-row .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blood),var(--blood-hi))}
+.bar-row .fill.human{background:linear-gradient(90deg,#1a4a44,#2ec49b)}
+.bar-row .fill.gold{background:linear-gradient(90deg,var(--gold-lo),var(--gold))}
+.bar-row .meta{color:var(--mut);font-size:.68rem;text-align:left;direction:ltr;white-space:nowrap}
+.bar-row .num{color:var(--text);font-size:.8rem;font-weight:700;text-align:left;direction:ltr}
+
+/* ── classification pills ── */
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.68rem;font-weight:700;border:1px solid var(--line2)}
+.pill.human_likely{color:#8ecbb8;border-color:#1e3d36;background:rgba(46,196,155,.07)}
+.pill.unknown{color:var(--mut)}
+.pill.bot{color:#e0929a;border-color:#57161b;background:rgba(142,28,34,.1)}
+.pill.suspicious{color:#e8c877;border-color:#3d3428;background:rgba(201,162,75,.07)}
+.pill.social_preview{color:#9ab8d4;border-color:#26394a;background:rgba(154,184,212,.07)}
+.pill.internal{color:#c8b98a;border-color:#3d3428;background:rgba(200,185,138,.07)}
+
+/* ── conf meter ── */
+.conf{display:inline-flex;align-items:center;gap:5px;direction:ltr}
+.conf .m{width:44px;height:5px;background:var(--ink2);border-radius:99px;overflow:hidden;display:inline-block}
+.conf .m i{display:block;height:100%;background:var(--gold)}
+.conf span{font-size:.68rem;color:var(--mut)}
+
+/* ── sparkline / area chart ── */
+.spark{width:100%;height:120px;display:block}
+.spark polyline{fill:none;stroke:var(--blood-hi);stroke-width:2}
+.spark .hline{stroke:var(--gold);stroke-width:2;fill:rgba(201,162,75,.09)}
+
+/* ── tables ── */
+.scroll{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:.76rem}
+th,td{text-align:right;padding:6px 9px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top}
+th{color:var(--mut);position:sticky;top:0;background:var(--panel);font-size:.68rem;letter-spacing:.06em;z-index:2}
+td code{background:var(--ink2);padding:1px 5px;border-radius:4px;font-size:.68rem;direction:ltr;display:inline-block;max-width:110px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+tr.clickable{cursor:pointer}
+tr.clickable:hover td{background:rgba(201,162,75,.04)}
+td.wrap{white-space:normal;max-width:260px;word-break:break-word}
+
+/* ── drawer (session inspector) ── */
+#drawer{position:fixed;top:0;left:-560px;bottom:0;width:min(540px,92vw);z-index:100;
+  background:linear-gradient(165deg,#181218,#0d0a0c);border-left:1px solid var(--line2);
+  transition:left .3s ease;display:flex;flex-direction:column;box-shadow:24px 0 60px -20px rgba(0,0,0,.85)}
+#drawer.open{left:0}
+#drawer .dhd{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+#drawer .dhd h3{font:900 .95rem Cairo;color:var(--gold-hi)}
+#drawer .dbody{overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:14px;flex:1}
+.dsec h4{font-size:.72rem;color:var(--mut);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:4px 12px;font-size:.8rem}
+.kv .k{color:var(--mut)}
+.kv .v{direction:ltr;text-align:right;word-break:break-all}
+.reasons li{font-size:.76rem;color:var(--mut);margin-bottom:4px;list-style:none;display:flex;gap:8px;align-items:center}
+.reasons li::before{content:"";width:8px;height:8px;border-radius:2px;flex:none}
+.reasons li.human::before{background:#2ec49b}
+.reasons li.bot::before{background:#c22f37}
+.reasons li.suspicious::before{background:var(--gold)}
+.reasons li.admin::before,.reasons li.none::before{background:var(--mut)}
+.timeline{display:flex;flex-direction:column;gap:0;font-size:.74rem}
+.tl-row{display:grid;grid-template-columns:64px 96px 1fr;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.tl-row .t{color:var(--mut);direction:ltr;text-align:left;font-family:monospace;font-size:.68rem}
+.tl-row .ty{font-weight:700}
+.tl-row .ty.pageview{color:var(--text)} .tl-row .ty.beacon_env{color:#8ecbb8}
+.tl-row .ty.link_click{color:var(--gold-hi)} .tl-row .ty.visibility{color:#9ab8d4}
+.tl-row .ty.first_visit{color:#c22f37} .tl-row .ty.returning_visit{color:#e8c877}
+.tl-row .ty.heartbeat{color:var(--mut)}
+.tl-row .d{color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#drawer .dactions{display:flex;gap:8px;flex-wrap:wrap;padding:0 18px 16px}
+#drawer .veil{position:fixed;inset:0;background:rgba(6,4,5,.6);z-index:99;display:none}
+#drawer .veil.open{display:block}
+
+/* ── reconciliation panel ── */
+.recon{border:1px dashed var(--line2);border-radius:10px;padding:14px 16px;color:var(--mut);font-size:.78rem;line-height:2}
+.recon b{color:var(--text)} .recon .num{color:var(--gold-hi);font-family:Cinzel;direction:ltr}
+.recon .eq{color:var(--mut);direction:ltr;text-align:center;font-family:monospace;margin:6px 0;display:block;font-size:.72rem}
+
+/* ── counting explainer ── */
+.how{border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:.78rem;color:var(--mut);line-height:2}
+.how b{color:var(--text)}
+.how .cls{display:inline-flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.loading{color:var(--mut);font-size:.82rem;padding:16px;text-align:center}
+.errbox{color:#e0929a;font-size:.82rem;padding:10px 14px;border:1px dashed #57161b;border-radius:8px;background:rgba(142,28,34,.06)}
+.nodata{color:var(--mut);font-size:.78rem;padding:10px;text-align:center}
+
+/* ── advanced analytics toggle ── */
+.adv-toggle{width:100%;background:none;border:1px dashed var(--line2);border-radius:8px;
+  color:var(--mut);font:600 .82rem Cairo;padding:10px 16px;cursor:pointer;text-align:right;
+  transition:color .15s,border-color .15s}
+.adv-toggle:hover{color:var(--gold-hi);border-color:var(--gold-lo)}
+.adv-toggle .arr{float:left;transition:transform .25s}
+.adv-toggle.open .arr{transform:rotate(180deg)}
+#advContent{display:none;flex-direction:column;gap:14px;margin-top:2px}
+#advContent.open{display:flex}
+
+/* responsive */
+@media(max-width:600px){
+  .bar-row{grid-template-columns:92px 1fr 70px 30px}
+  .kpi-row{grid-template-columns:1fr 1fr}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+
+  <!-- ═══ AUTH WALL ═══ -->
+  <div id="authWall" class="show">
+    <div class="login-box">
+      <div class="brand">ALUCARD</div>
+      <p>لوحة التحليلات — أدخل كلمة المرور</p>
+      <input type="password" id="tokenInput" placeholder="••••••••••" autocomplete="current-password" aria-label="كلمة مرور الأدمن">
+      <button class="go" id="loginBtn">دخول</button>
+      <div class="err" id="loginErr" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div id="mainContent" style="display:none">
+
+    <div class="hd">
+      <div class="hd-l">
+        <h1>ALUCARD — التحليلات</h1>
+        <span class="fm">FIRST-PARTY · PRIVACY-FIRST</span>
+      </div>
+      <div class="hd-r">
+        <span class="livebadge" id="liveBadge" style="display:none"><b id="liveN">0</b> نشط الآن</span>
+        <button class="btn gold" id="testModeBtn" title="وضع القياس الداخلي — علامة زياراتك كـ internal">🧪 وضع الاختبار</button>
+        <button class="btn" id="exportBtn">⬇ تصدير JSON</button>
+        <button class="btn danger" id="logoutBtn">خروج</button>
+        <a class="btn" href="/">الموقع</a>
+      </div>
+    </div>
+
+    <!-- filters -->
+    <div class="filters" id="filters">
+      <div class="fg"><label>من</label><input type="date" id="f_from"></div>
+      <div class="fg"><label>إلى</label><input type="date" id="f_to"></div>
+      <div class="fg"><label>المصدر</label><select id="f_source"><option value="">الكل</option></select></div>
+      <div class="fg"><label>الجهاز</label><select id="f_device"><option value="">الكل</option></select></div>
+      <div class="fg"><label>OS</label><select id="f_os"><option value="">الكل</option></select></div>
+      <div class="fg"><label>المتصفح</label><select id="f_browser"><option value="">الكل</option></select></div>
+      <div class="fg"><label>التصنيف</label><select id="f_classification">
+        <option value="">الكل</option>
+        <option value="human_likely">Human-likely</option>
+        <option value="unknown">Unknown</option>
+        <option value="bot">Bot</option>
+        <option value="suspicious">Suspicious</option>
+        <option value="social_preview">Social preview</option>
+        <option value="internal">Internal</option>
+      </select></div>
+      <div class="fg"><label>In-app</label><select id="f_inapp">
+        <option value="">الكل</option><option value="1">متصفح مدمج</option><option value="0">خارجي</option></select></div>
+      <div class="fg"><label>الزائر</label><input id="f_visitor" placeholder="id (32 hex)" style="min-width:130px" size="12"></div>
+      <div class="fg"><label>داخلي</label><select id="f_internal">
+        <option value="">مستبعد من المجاميع (افتراضي)</option><option value="1">عرض الداخلي فقط</option></select></div>
+      <button class="btn clear" id="f_clear">مسح الفلاتر</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-row" id="kpiRow"><div class="loading">جاري التحميل…</div></div>
+
+    <!-- charts -->
+    <div class="grid2">
+      <div class="card">
+        <div class="card-hd"><h2>الزيارات عبر الوقت</h2></div>
+        <svg class="spark" id="timeChart" viewBox="0 0 600 120" preserveAspectRatio="none"></svg>
+        <div class="nodata" id="timeLegend"></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><h2>جودة الزيارات (تصنيف)</h2></div>
+        <div id="clsChart" class="loading">…</div>
+      </div>
+    </div>
+
+    <!-- ── advanced analytics (collapsible) ── -->
+    <button class="adv-toggle" id="advToggle">
+      التحليلات المتقدمة (المصادر، الأجهزة، أنظمة التشغيل، المتصفحات، مُصنّعو الأجهزة، In-App)
+      <span class="arr">▲</span>
+    </button>
+    <div id="advContent">
+    <div class="grid3">
+      <div class="card"><div class="card-hd"><h2>المصادر</h2></div><div id="srcChart" class="loading">…</div></div>
+      <div class="card"><div class="card-hd"><h2>الأجهزة</h2></div><div id="devChart" class="loading">…</div></div>
+      <div class="card"><div class="card-hd"><h2>أنظمة التشغيل</h2></div><div id="osChart" class="loading">…</div></div>
+    </div>
+
+    <div class="grid3">
+      <div class="card"><div class="card-hd"><h2>المتصفحات</h2></div><div id="brChart" class="loading">…</div></div>
+      <div class="card"><div class="card-hd"><h2>مصنّعو الأجهزة</h2></div><div id="vendorChart" class="loading">…</div></div>
+      <div class="card"><div class="card-hd"><h2>متصفح مدمج (In-App)</h2></div><div id="inappChart" class="loading">…</div></div>
+    </div>
+    </div><!-- /advContent -->
+
+    <!-- sessions table -->
+    <div class="card">
+      <div class="card-hd"><h2>الجلسات — اضغط أي جلسة للتفاصيل</h2>
+        <span class="hint" style="color:var(--mut);font-size:.72rem">visitor ≠ session ≠ human</span></div>
+      <div class="scroll"><table><thead id="sessHead"></thead><tbody id="sessBody"></tbody></table></div>
+    </div>
+
+    <!-- how we count -->
+    <div class="how" id="howBox">
+      <b>إزاي بنعد؟</b> — <b>visitor</b> = هوية مجهولة دائمة (كوكي). <b>session</b> = نافذة زيارة واحدة (٣٠ دقيقة حد أقصى من آخر نشاط). <b>pageview</b> = تحميل صفحة. <b>event</b> = أي تفاعل. الجلسة الواحدة ممكن يكون فيها pageviews كتير — زيارة واحدة من نفس الشخص مش بتتحول لبشر إضافيين.
+      <br><b>التصنيف احتمالي مش قاطع</b> — بنجمع إشارات مرجّحة (JS اشتغل؟ نبضات؟ تفاعل؟ UA؟ توقيت؟) ونحسب ثقة. <b>Unknown</b> نتيجة محترمة وليست فشل.
+      <span class="cls">
+        <span class="pill human_likely">HUMAN-LIKELY</span>
+        <span class="pill unknown">UNKNOWN</span>
+        <span class="pill bot">BOT</span>
+        <span class="pill suspicious">SUSPICIOUS</span>
+        <span class="pill social_preview">SOCIAL PREVIEW</span>
+        <span class="pill internal">INTERNAL</span>
+      </span>
+    </div>
+
+    <!-- reconciliation -->
+    <div class="card">
+      <div class="card-hd"><h2>تسوية البيانات (Reconciliation)</h2></div>
+      <div class="recon" id="reconBox">…</div>
+    </div>
+
+  </div><!-- /mainContent -->
+</main>
+
+<!-- ═══ SESSION INSPECTOR DRAWER ═══ -->
+<div id="drawer">
+  <div class="veil" id="drawerVeil" data-close></div>
+  <div class="dhd">
+    <div>
+      <h3 id="dTitle">جلسة</h3>
+      <span id="dSub" style="color:var(--mut);font-size:.72rem;direction:ltr"></span>
+    </div>
+    <button class="btn danger" id="drawerClose">✕</button>
+  </div>
+  <div class="dbody" id="drawerBody"></div>
+  <div class="dactions" id="drawerActions">
+    <button class="btn" data-cls="internal">🧪 علّم كـ Internal</button>
+    <button class="btn" data-cls="human_likely">👤 علّم Human</button>
+    <button class="btn" data-cls="bot">🤖 علّم Bot</button>
+    <button class="btn" data-cls="unknown">؟ علّم Unknown</button>
+    <button class="btn" data-cls="suspicious">⚠ علّم Suspicious</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ───────── utils ───────── */
+  var esc = function (s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  };
+  var el = function (id) { return document.getElementById(id); };
+  var shortId = function (v, n) {
+    v = String(v || '');
+    return '<code>' + esc(v.length > n ? v.slice(0, n) + '…' : v) + '</code>';
+  };
+  var fmtT = function (ts) { return ts ? String(ts).slice(11, 19) : '—'; };
+  var fmtD = function (ts) { return ts ? String(ts).slice(0, 16).replace('T', ' ') : '—'; };
+  var fmtDur = function (s) {
+    if (s == null) return '—';
+    s = Math.round(s);
+    if (s < 60) return s + 's';
+    var m = Math.floor(s / 60), r = s % 60;
+    return m + 'm' + (r ? ' ' + r + 's' : '');
+  };
+  var pill = function (cls) {
+    return '<span class="pill ' + (cls || 'unknown') + '">' + (cls || 'unknown').replace('_', ' ').toUpperCase() + '</span>';
+  };
+  var confMeter = function (c) {
+    if (c == null) return '';
+    var pct = Math.round(c);
+    return '<span class="conf"><span class="m"><i style="width:' + pct + '%"></i></span><span>' + pct + '%</span></span>';
+  };
+  var CLASS_AR = {
+    human_likely: 'زيارة آدمية مرجّحة', unknown: 'غير محدد',
+    bot: 'بوت / أتمتة', suspicious: 'مشبوه', social_preview: 'معاينة سوشيال ميديا',
+    internal: 'داخلي / اختبار'
+  };
+
+  function fetchJ(path) {
+    return fetch(path, { credentials: 'same-origin' }).then(function (r) {
+      if (r.status === 401) { showAuth(); throw new Error('unauth'); }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
+  }
+
+  /* ───────── auth ───────── */
+  function showAuth() {
+    el('authWall').classList.add('show');
+    el('mainContent').style.display = 'none';
+  }
+  function showDash() {
+    el('authWall').classList.remove('show');
+    el('mainContent').style.display = 'flex';
+  }
+
+  fetchJ('/admin/api/summary.json')
+    .then(function () { showDash(); refreshAll(); })
+    .catch(function () { showAuth(); });
+
+  function doLogin() {
+    var t = el('tokenInput').value.trim();
+    if (!t) { el('loginErr').textContent = 'أدخل كلمة المرور'; return; }
+    el('loginBtn').disabled = true;
+    fetch('/admin/login', { method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: t }) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.ok) { showDash(); refreshAll(); } else { el('loginErr').textContent = 'كلمة المرور غلط'; }
+      })
+      .catch(function () { el('loginErr').textContent = 'خطأ في الاتصال'; })
+      .finally(function () { el('loginBtn').disabled = false; });
+  }
+  el('loginBtn').addEventListener('click', doLogin);
+  el('tokenInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
+
+  el('logoutBtn').addEventListener('click', function () {
+    fetch('/admin/logout', { method: 'POST', credentials: 'same-origin' }).finally(function () { location.reload(); });
+  });
+
+  /* internal/test-mode toggle: prompts for the admin token once */
+  el('testModeBtn').addEventListener('click', function () {
+    var tok = prompt('أدخل كلمة مرور الأدمن لتفعيل/إيقاف وضع القياس الداخلي\n(زياراتك بعد التفعيل هتتحط تحت "internal" وتتستبعد افتراضياً):');
+    if (!tok) return;
+    var on = confirm('اضغط موافق لتفعيل وضع الاختبار، أو إلغاء لإيقافه.');
+    fetch('/internal/toggle', { method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: tok, on: on }) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.ok) alert(on ? 'وضع الاختبار مفعّل — الصفحة هتتسجل كـ internal.' : 'وضع الاختبار متوقف.');
+        else alert('فشل: unauthorized');
+      })
+      .catch(function () { alert('خطأ في الاتصال'); });
+  });
+
+  /* ───────── filters ───────── */
+  var FIDS = ['f_from', 'f_to', 'f_source', 'f_device', 'f_os', 'f_browser', 'f_classification', 'f_inapp', 'f_visitor', 'f_internal'];
+  function filterQS() {
+    var q = [];
+    var map = {
+      f_from: 'from', f_to: 'to', f_source: 'source', f_device: 'device_type',
+      f_os: 'os', f_browser: 'browser', f_classification: 'classification',
+      f_inapp: 'in_app', f_visitor: 'visitor_id'
+    };
+    FIDS.forEach(function (id) {
+      var v = el(id).value.trim ? el(id).value.trim() : el(id).value;
+      if (!v) return;
+      if (id === 'f_internal') {
+        if (v === '1') { q.push('exclude_internal=0&classification=internal'); }
+        return;
+      }
+      q.push(encodeURIComponent(map[id]) + '=' + encodeURIComponent(v));
+    });
+    return q.length ? '?' + q.join('&') : '';
+  }
+  FIDS.forEach(function (id) {
+    el(id).addEventListener('change', refreshAll);
+    if (el(id).tagName === 'INPUT') el(id).addEventListener('input', debounce(refreshAll, 600));
+  });
+  el('f_clear').addEventListener('click', function () {
+    FIDS.forEach(function (id) { el(id).value = ''; });
+    refreshAll();
+  });
+  function debounce(fn, ms) {
+    var t; return function () { clearTimeout(t); t = setTimeout(fn, ms); };
+  }
+
+  /* ───────── renderers ───────── */
+  function bars(container, rows, opts) {
+    opts = opts || {};
+    if (!rows || !rows.length) { container.innerHTML = '<div class="nodata">لا توجد بيانات بهذه الفلاتر</div>'; return; }
+    var max = Math.max.apply(null, rows.map(function (r) { return r.n; }));
+    container.innerHTML = '<div class="bars">' + rows.map(function (r) {
+      var name = opts.label ? opts.label(r) : (r.k || '—');
+      var pct = max ? Math.round(100 * r.n / max) : 0;
+      var meta = opts.meta ? opts.meta(r) : '';
+      return '<div class="bar-row">' +
+        '<div class="name" title="' + esc(name) + '">' + esc(name) + '</div>' +
+        '<div class="track"><div class="fill ' + (opts.cls || '') + '" style="width:' + pct + '%"></div></div>' +
+        '<div class="meta">' + meta + '</div>' +
+        '<div class="num">' + r.n + '</div></div>';
+    }).join('') + '</div>';
+  }
+
+  function sparkline(svg, data) {
+    if (!data || !data.length) { svg.innerHTML = ''; return; }
+    var W = 600, H = 120, pad = 6;
+    var max = Math.max.apply(null, data.map(function (d) { return d.sessions; })) || 1;
+    var step = data.length > 1 ? (W - pad * 2) / (data.length - 1) : 0;
+    var pts = data.map(function (d, i) {
+      return [pad + i * step, H - pad - (d.sessions / max) * (H - pad * 2)];
+    });
+    var hPts = data.map(function (d, i) {
+      return [pad + i * step, H - pad - (d.human / max) * (H - pad * 2)];
+    });
+    var line = function (p) { return p.map(function (pt) { return pt[0] + ',' + pt[1]; }).join(' '); };
+    var area = pts.map(function (pt) { return pt[0] + ',' + (H - pad); }).join(' ');
+    svg.innerHTML =
+      '<polygon class="hline" points="' + line(pts) + ' ' + area + '"></polygon>' +
+      '<polyline points="' + line(pts) + '"></polyline>' +
+      '<polyline points="' + line(hPts) + '" style="stroke:#2ec49b;opacity:.7"></polyline>';
+  }
+
+  /* ───────── KPI + charts ───────── */
+  function kpiCard(cls, dotColor, label, val, sub) {
+    return '<div class="kpi ' + cls + '">' +
+      '<div class="lbl"><span class="dot" style="background:' + dotColor + '"></span>' + label + '</div>' +
+      '<div class="val">' + esc(String(val)) + '</div>' +
+      (sub ? '<div class="sub">' + esc(sub) + '</div>' : '') + '</div>';
+  }
+
+  function renderSummary(t, model) {
+    var pvPer = t.sessions ? (t.pageviews / t.sessions).toFixed(1) : '—';
+    var bouncePct = t.sessions ? Math.round(100 * t.bounce_sessions / t.sessions) : null;
+    el('kpiRow').innerHTML =
+      kpiCard('human', '#2ec49b', 'زوار Human-likely', t.human_visitors, 'من ' + t.visitors + ' زائر بالفلاتر') +
+      kpiCard('human', '#2ec49b', 'جلسات Human-likely', t.human_sessions, 'من ' + t.sessions + ' جلسة') +
+      kpiCard('gold', 'var(--gold)', 'زوار راجعين', t.returning_visitors, 'زاورا أكتر من مرة') +
+      kpiCard('', '#9ab8d4', 'Pageviews', t.pageviews, pvPer + ' / جلسة') +
+      kpiCard('blue', '#9ab8d4', 'متوسط المدة', t.avg_duration_s != null ? fmtDur(t.avg_duration_s) : '—',
+              'على ' + t.duration_sample_n + ' جلسة') +
+      kpiCard('blue', '#9ab8d4', 'وسيط المدة', t.median_duration_s != null ? fmtDur(t.median_duration_s) : '—',
+              'p90: ' + (t.p90_duration_s != null ? fmtDur(t.p90_duration_s) : '—')) +
+      kpiCard('bot', '#c22f37', 'بوت / أتمتة', t.bot_sessions, bouncePct != null ? 'bounce≈' + bouncePct + '%' : '') +
+      kpiCard('unk', 'var(--mut)', 'غير محدد', t.unknown_sessions, 'Unknown مش فشل — حقيقة') +
+      (t.suspicious_sessions ? kpiCard('warn', 'var(--gold)', 'مشبوه', t.suspicious_sessions, 'نمط تكرار غريب') : '') +
+      (t.preview_sessions ? kpiCard('warn', '#9ab8d4', 'معاينات سوشيال', t.preview_sessions, 'link previews') : '') +
+      (t.internal_sessions ? kpiCard('warn', '#c8b98a', 'Internal/Test Traffic — مستبعد من المجاميع', t.internal_sessions, 'رقم منفصل: لا يدخل في أي مجموع أعلاه') : '');
+
+    el('reconBox').innerHTML =
+      '<b>التسوية:</b> <span class="num">' + t.visitors + '</span> زائر ← <span class="num">' + t.sessions +
+      '</span> جلسة ← <span class="num">' + t.pageviews + '</span> pageview.' +
+      (t.visitors_total ? ' (إجمالي الزوار التاريخي: <span class="num">' + t.visitors_total + '</span>)' : '') +
+      '<br><span class="eq">visitors (' + t.visitors + ') ≤ sessions (' + t.sessions + ') ≤ pageviews (' + t.pageviews + ') — EXTERNAL ONLY</span>' +
+      '<br><b>مجموع التصنيفات الأساسية (human + bot + unknown + suspicious + preview = <span class="num">' +
+        (t.human_sessions + t.bot_sessions + t.unknown_sessions + t.suspicious_sessions + t.preview_sessions) +
+        '</span>) يخص الترافيك الخارجي فقط ويجب أن يساوي إجمالي الجلسات (' + t.sessions +
+        '). أما Internal/Test Traffic (<span class="num">' + (t.internal_sessions || 0) + '</span>) فرقم منفصل لا يدخل في هذا المجموع إطلاقاً.</b>' +
+      '<b>ليه ممكن زائر واحد = جلسات كتير؟</b> نفس الشخص ممكن يرجع أكتر من مرة — كل رجوع بعد فاصل ' +
+      Math.round((model && model.session_gap_s || 1800) / 60) + ' دقيقة خمول بيتحسب جلسة جديدة، وكل refresh بيتحسب pageview زيادة مش إنسان جديد.' +
+      (t.returning_visitors ? '<br><b>' + t.returning_visitors + '</b> زائر على الأقل راجع — يعني التكرار متوقع، مش دليل على بشر إضافيين.' : '') +
+      (t.internal_sessions ? '<br><span class="pill internal">INTERNAL/TEST TRAFFIC — EXCLUDED FROM TOTALS: ' + t.internal_sessions + ' جلسة من اختباراتك — رقم منفصل تماماً، لا يدخل في أي مجموعة أعلاه (لا في الزوار، ولا الجلسات، ولا التصنيفات، ولا المدد).</span>' : '');
+  }
+
+  function renderOverview(o) {
+    // sources with quality metadata
+    bars(el('srcChart'), o.bySource, {
+      label: function (r) { return r.k || 'direct'; },
+      meta: function (r) {
+        var parts = [];
+        if (r.human) parts.push('👤' + r.human);
+        if (r.avg_dur) parts.push(fmtDur(Math.round(r.avg_dur)));
+        if (r.avg_pv) parts.push(r.avg_pv.toFixed(1) + 'pv/s');
+        return parts.join(' · ') || '—';
+      },
+      cls: 'human'
+    });
+    bars(el('devChart'), o.byDevice, {
+      label: function (r) { return r.k || 'unknown'; },
+      meta: function (r) { return r.human ? '👤' + r.human : ''; }
+    });
+    bars(el('osChart'), o.byOs, {
+      label: function (r) { return r.k || 'unknown'; },
+      meta: function (r) { return r.human ? '👤' + r.human : ''; }, cls: 'gold'
+    });
+    bars(el('brChart'), o.byBrowser, {
+      label: function (r) { return r.k || 'unknown'; },
+      meta: function (r) { return r.human ? '👤' + r.human : ''; }
+    });
+    bars(el('vendorChart'), o.byVendor, {
+      label: function (r) { return r.k || 'Unknown'; },
+      meta: function (r) { return r.human ? '👤' + r.human : ''; }, cls: 'gold'
+    });
+    bars(el('inappChart'), o.byInApp, {
+      label: function (r) { return r.k || 'غير معروف'; },
+      meta: function (r) { return ''; }
+    });
+
+    bars(el('clsChart'), o.byClassification, {
+      label: function (r) { return (r.k || 'unknown').replace('_', ' ').toUpperCase(); },
+      meta: function (r) { return CLASS_AR[r.k] || ''; },
+      cls: function (r) { return r.k === 'human_likely' ? 'human' : r.k === 'bot' ? '' : 'gold'; }
+    });
+    // fix: bars() opts.cls expects string — patch for classification colors
+    var clsRows = o.byClassification || [];
+    if (clsRows.length) {
+      var maxC = Math.max.apply(null, clsRows.map(function (r) { return r.n; }));
+      el('clsChart').innerHTML = '<div class="bars">' + clsRows.map(function (r) {
+        var fill = r.k === 'human_likely' ? 'human' : (r.k === 'bot' ? '' : 'gold');
+        var pct = maxC ? Math.round(100 * r.n / maxC) : 0;
+        return '<div class="bar-row">' +
+          '<div class="name">' + pill(r.k) + '</div>' +
+          '<div class="track"><div class="fill ' + fill + '" style="width:' + pct + '%"></div></div>' +
+          '<div class="meta">' + esc(CLASS_AR[r.k] || '') + '</div>' +
+          '<div class="num">' + r.n + '</div></div>';
+      }).join('') + '</div>';
+    } else el('clsChart').innerHTML = '<div class="nodata">لا جلسات</div>';
+
+    sparkline(el('timeChart'), o.overTime || []);
+    el('timeLegend').innerHTML = (o.overTime && o.overTime.length)
+      ? '<span style="color:var(--blood-hi)">■</span> كل الجلسات &nbsp; <span style="color:#2ec49b">■</span> Human-likely — من ' +
+        esc(String((o.overTime[0] || {}).hour || '')) + ' إلى ' +
+        esc(String((o.overTime[o.overTime.length - 1] || {}).hour || ''))
+      : 'لا بيانات زمنية';
+
+    // populate filter dropdowns from observed values
+    fillSelect('f_source', (o.bySource || []).map(function (r) { return r.k || 'direct'; }));
+    fillSelect('f_device', (o.byDevice || []).map(function (r) { return r.k || 'unknown'; }));
+    fillSelect('f_os', (o.byOs || []).map(function (r) { return r.k || 'unknown'; }));
+    fillSelect('f_browser', (o.byBrowser || []).map(function (r) { return r.k || 'unknown'; }));
+  }
+
+  function fillSelect(id, values) {
+    var sel = el(id), cur = sel.value;
+    values.filter(function (v, i, a) { return a.indexOf(v) === i && v; })
+      .sort().forEach(function (v) {
+        if (![].some.call(sel.options, function (o) { return o.value === v; })) {
+          var o = document.createElement('option');
+          o.value = v; o.textContent = v;
+          sel.appendChild(o);
+        }
+      });
+    sel.value = cur;
+  }
+
+  /* ───────── sessions table ───────── */
+  function renderSessions(rows) {
+    el('sessHead').innerHTML = '<tr>' +
+      ['الجلسة', 'الزائر', 'التصنيف', 'الثقة', 'بدأت', 'آخر نشاط', 'المدة', 'PV', '⟳', 'المصدر', 'الجهاز', 'المتصفح'].map(function (h) {
+        return '<th>' + h + '</th>';
+      }).join('') + '</tr>';
+    if (!rows.length) {
+      el('sessBody').innerHTML = '<tr><td colspan="12" class="nodata">لا جلسات بهذه الفلاتر</td></tr>';
+      return;
+    }
+    el('sessBody').innerHTML = rows.map(function (r) {
+      var dev = [r.device_vendor, r.device_model, r.device_type].filter(Boolean).join(' ') || '—';
+      var br = (r.browser || '—') + (r.browser_version ? ' ' + r.browser_version.slice(0, 6) : '');
+      return '<tr class="clickable" data-sid="' + esc(r.id) + '">' +
+        '<td>' + shortId(r.id, 8) + '</td>' +
+        '<td>' + shortId(r.visitor_id, 8) + (r.visit_count > 1 ? ' <span style="color:var(--gold-hi)" title="' + r.visit_count + ' زيارات">↩' + r.visit_count + '</span>' : '') + '</td>' +
+        '<td>' + pill(r.classification) + (r.is_internal ? ' <span class="pill internal">INT</span>' : '') + '</td>' +
+        '<td>' + confMeter(r.confidence) + '</td>' +
+        '<td>' + fmtT(r.started_at) + '</td>' +
+        '<td>' + fmtT(r.last_activity_at) + '</td>' +
+        '<td>' + fmtDur(r.duration_s) + '</td>' +
+        '<td>' + (r.pageviews || 1) + '</td>' +
+        '<td>' + (r.refresh_count ? '<span style="color:var(--gold-hi)">' + r.refresh_count + '</span>' : '0') + '</td>' +
+        '<td>' + esc(r.source || 'direct') + (r.in_app_app ? ' <span class="pill social_preview">' + esc(r.in_app_app) + '</span>' : '') + '</td>' +
+        '<td>' + esc(dev) + '</td>' +
+        '<td>' + esc(br) + '</td></tr>';
+    }).join('');
+
+    [].forEach.call(el('sessBody').querySelectorAll('tr.clickable'), function (tr) {
+      tr.addEventListener('click', function () { openDrawer(tr.dataset.sid); });
+    });
+  }
+
+  /* ───────── session drawer ───────── */
+  var drawer = el('drawer'), veil = el('drawerVeil');
+  function openDrawer(sid) {
+    fetchJ('/admin/api/session.json?id=' + encodeURIComponent(sid)).then(function (d) {
+      var s = d.session;
+      el('dTitle').innerHTML = pill(s.classification) + ' &nbsp;' + (CLASS_AR[s.classification] || '');
+      el('dSub').textContent = 'session ' + s.id;
+      var reasons = [];
+      try { reasons = JSON.parse(s.classification_reasons || '[]'); } catch (e) {}
+      var dev = [s.device_vendor, s.device_model, s.device_type].filter(Boolean).join(' ') || 'unknown';
+      var os = (s.os || 'unknown') + (s.os_version ? ' ' + s.os_version : '');
+      var br = (s.browser || 'unknown') + (s.browser_version ? ' ' + s.browser_version : '');
+      el('drawerBody').innerHTML =
+        '<div class="dsec"><h4>أدلة التصنيف (ليه اتصنفت كده؟)</h4><ul class="reasons">' +
+          (reasons.length ? reasons.map(function (r) {
+            return '<li class="' + (r.kind || 'none') + '">' + esc(r.text || '') +
+              ' <span style="color:var(--gold-lo);direction:ltr">+' + (r.w || 0) + '</span></li>';
+          }).join('') : '<li class="none">مفيش أسباء مسجلة</li>') +
+        '</ul></div>' +
+        '<div class="dsec"><h4>بيانات الجلسة</h4><div class="kv">' +
+          kv('Visitor', '<span style="color:var(--gold-hi);cursor:pointer;text-decoration:underline" id="visitorLink">' + esc(s.visitor_id) + '</span>') +
+          kv('زيارات الزائر', s.visit_count || '—') +
+          kv('بدأت', fmtD(s.started_at)) + kv('آخر نشاط', fmtD(s.last_activity_at)) +
+          kv('مدة (wall)', fmtDur(s.duration_s)) + kv('مدة نشطة (client)', fmtDur(s.active_duration_s)) +
+          kv('Pageviews', s.pageviews || 1) + kv('أحداث', s.event_count || 0) +
+          kv('Refreshes', s.refresh_count || 0) +
+          kv('المصدر', esc(s.source || 'direct')) + kv('Referrer', esc(s.referrer || '—')) +
+          kv('مدمج', s.in_app_app || 'لا') +
+          kv('الجهاز', esc(dev)) + kv('OS', esc(os)) + kv('المتصفح', esc(br)) +
+          kv('داخلي؟', s.is_internal ? 'نعم' : 'لا') +
+        '</div></div>' +
+        '<div class="dsec"><h4>الخط الزمني (' + (d.timeline || []).length + ' حدث)</h4><div class="timeline">' +
+          (d.timeline || []).map(function (e) {
+            var detail = '';
+            try { var x = JSON.parse(e.extra || '{}');
+              if (x.href) detail = x.href;
+              else if (x.state) detail = 'tab ' + x.state;
+              else if (x.refresh) detail = '↻ refresh';
+              else if (x.session_start) detail = 'بداية الجلسة';
+            } catch (er) {}
+            return '<div class="tl-row"><span class="t">' + esc(String(e.ts).slice(11, 23)) + '</span>' +
+              '<span class="ty ' + esc(e.type) + '">' + esc(e.type) + '</span>' +
+              '<span class="d">' + esc(e.path || '') + (detail ? ' — ' + esc(detail) : '') + '</span></div>';
+          }).join('') || '<div class="nodata">مفيش أحداث</div>') +
+        '</div></div>';
+      drawer.classList.add('open'); veil.classList.add('open');
+      var vl = el('visitorLink');
+      if (vl) vl.addEventListener('click', function () { openVisitor(s.visitor_id); });
+    }).catch(function (e) { console.error(e); });
+  }
+  function kv(k, v) { return '<span class="k">' + k + '</span><span class="v">' + v + '</span>'; }
+  function closeDrawer() { drawer.classList.remove('open'); veil.classList.remove('open'); }
+  el('drawerClose').addEventListener('click', closeDrawer);
+  veil.addEventListener('click', closeDrawer);
+  addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrawer(); });
+
+  /* manual override buttons */
+  [].forEach.call(el('drawerActions').querySelectorAll('button[data-cls]'), function (b) {
+    b.addEventListener('click', function () {
+      var sid = el('dSub').textContent.replace('session ', '').trim();
+      fetch('/admin/api/override.json', { method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sid, classification: b.dataset.cls }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (d.ok) { closeDrawer(); refreshAll(); } })
+        .catch(function () {});
+    });
+  });
+
+  /* ───────── visitor profile ───────── */
+  function openVisitor(vid) {
+    fetchJ('/admin/api/visitor.json?id=' + encodeURIComponent(vid)).then(function (d) {
+      var v = d.visitor;
+      var srcH = Object.keys(d.source_history || {}).map(function (k) {
+        return k + ' (' + d.source_history[k] + ')';
+      }).join(' · ') || '—';
+      var devH = Object.keys(d.device_history || {}).map(function (k) {
+        return k + ' (' + d.device_history[k] + ')';
+      }).join(' · ') || '—';
+      var brH = Object.keys(d.browser_history || {}).map(function (k) {
+        return k + ' (' + d.browser_history[k] + ')';
+      }).join(' · ') || '—';
+      el('dTitle').innerHTML = '👤 ملف زائر مجهول';
+      el('dSub').textContent = 'visitor ' + v.id;
+      el('drawerBody').innerHTML =
+        '<div class="dsec"><h4>الزائر</h4><div class="kv">' +
+          kv('ID', esc(v.id)) + kv('أول ظهور', fmtD(v.first_seen)) +
+          kv('آخر ظهور', fmtD(v.last_seen)) + kv('عدد الجلسات', (d.sessions || []).length) +
+          kv('إجمالي الزيارات', v.visit_count) +
+          kv('مصادر', esc(srcH)) + kv('أجهزة', esc(devH)) + kv('متصفحات', esc(brH)) +
+        '</div></div>' +
+        '<div class="dsec"><h4>خط الجلسات</h4><div class="timeline">' +
+          (d.sessions || []).map(function (s, i) {
+            return '<div class="tl-row"><span class="t">#' + (i + 1) + '</span>' +
+              '<span class="ty ' + (s.classification === 'human_likely' ? 'beacon_env' : 'returning_visit') + '">' + esc(s.source || 'direct') + '</span>' +
+              '<span class="d">' + fmtD(s.started_at) + ' · ' + fmtDur(s.duration_s) + ' · ' +
+              (s.pageviews || 1) + 'pv' + (s.refresh_count ? ' · ⟳' + s.refresh_count : '') +
+              ' · ' + pill(s.classification) + '</span></div>';
+          }).join('') + '</div></div>';
+      drawer.classList.add('open'); veil.classList.add('open');
+    }).catch(function () {});
+  }
+
+  /* ───────── live now ───────── */
+  var liveTimer = null;
+  function refreshLive() {
+    fetchJ('/admin/api/live.json').then(function (rows) {
+      el('liveN').textContent = rows.length;
+      el('liveBadge').style.display = rows.length ? 'inline-flex' : 'none';
+    }).catch(function () {});
+  }
+
+  /* ───────── export ───────── */
+  el('exportBtn').addEventListener('click', function () {
+    fetch('/admin/api/export.json', { credentials: 'same-origin' })
+      .then(function (r) { if (!r.ok) throw new Error('unauth'); return r.blob(); })
+      .then(function (blob) {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'alucard-analytics-v2-' + new Date().toISOString().slice(0, 10) + '.json';
+        a.click(); URL.revokeObjectURL(a.href);
+      }).catch(function () { alert('فشل التصدير'); });
+  });
+
+  /* ───────── main refresh ───────── */
+  function refreshAll() {
+    var qs = filterQS();
+    fetchJ('/admin/api/summary.json' + qs).then(function (d) {
+      renderSummary(d.totals, d.model);
+    }).catch(function (e) { el('kpiRow').innerHTML = '<div class="errbox">خطأ: ' + esc(e.message) + '</div>'; });
+
+    fetchJ('/admin/api/overview.json' + qs).then(renderOverview).catch(function () {});
+    fetchJ('/admin/api/sessions.json' + qs).then(renderSessions).catch(function () {});
+    refreshLive();
+  }
+
+  /* advanced analytics toggle */
+  var advToggle = el('advToggle'), advContent = el('advContent');
+  advToggle.addEventListener('click', function () {
+    var open = advContent.classList.toggle('open');
+    advToggle.classList.toggle('open', open);
+  });
+
+  refreshAll();
+  liveTimer = setInterval(refreshLive, 10000);
+})();
+</script>
+</body>
+</html>
